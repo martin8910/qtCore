@@ -2,11 +2,16 @@ __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
+from .context_maya import get_window
 
 
 ###################################################################################################
 # Dialogs
 ###################################################################################################
+
+def progress_window(max=100, title="Operation in progress."):
+    progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=get_window)
+    return progress_window
 
 def yesCancelDialog(title="Remove action", message="Are you sure you wanna remove this action?"):
     # Create dialog

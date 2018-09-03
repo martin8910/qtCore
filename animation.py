@@ -118,7 +118,27 @@ def slideWindowBothAnimation(start=(-100, 0), end=(0, 0), duration=300, object=N
         slideAnimation.setEndValue(QtCore.QPoint(pos.x() + end[1], pos.y() + end[0]))
         slideAnimation.start()
 
+def simple_property_animation(startValue=None, endValue=None, duration=500,object=None, property="size", easing="InOutQuint"):
 
+    # Create animation
+    animation = QtCore.QPropertyAnimation(object, property, object)
+
+    # Easing
+    style = QtCore.QEasingCurve()
+    #style.setType(QtCore.QEasingCurve.InOutQuint)
+    style.setType(QtCore.QEasingCurve.InBounce)
+
+    #animation.setEasingCurve(style)
+
+    # Set Duration
+    animation.setDuration(duration)
+
+    # Set values
+    animation.setStartValue(startValue)
+    animation.setEndValue(endValue)
+
+    #Start animation
+    animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
 
 def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, property="iconSize",mode="InOutQuint", finishAction=None):
     animation = QtCore.QPropertyAnimation(object, property, object)
@@ -176,34 +196,36 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
     animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
 
 
+# Version 1.5 of the aninmation widgetsize that works for horizontal elements as well
 def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False):
     '''Animate an objects height'''
 
+    # Set automatic duration if not set
     if duration == False:
         duration = min(abs(start[1] - end[1]) * 5, 500)
 
-    #duration = 0
     #for attribute in ["minimumSize", "maximumSize"]:
     for attribute in attributelist:
         if attribute == "minimumSize":
             element.setMinimumHeight(end[1])
+            element.setMinimumWidth(end[0])
         elif attribute == "maximumSize":
             element.setMaximumHeight(0)
+            element.setMaximumWidth(0)
             # pass
 
         # Create animation property and set start and end point
         animation = QtCore.QPropertyAnimation(element, attribute, element)
-        if attribute == "maximumSize":
-            animation.setStartValue(QtCore.QSize(6000, start[1]))
-            animation.setEndValue(QtCore.QSize(6000, end[1]))
-        else:
-            animation.setStartValue(QtCore.QSize(0, start[1]))
-            animation.setEndValue(QtCore.QSize(0, end[1]))
+
+        # Set start and end values
+        animation.setStartValue(QtCore.QSize(start[0], start[1]))
+        animation.setEndValue(QtCore.QSize(end[0], end[1]))
 
         # Create easing style
         style = QtCore.QEasingCurve()
         if start[1] <= end[1]:
             style.setType(QtCore.QEasingCurve.OutBounce)
+            #style.setType(QtCore.QEasingCurve.OutExpo)
             style.setAmplitude(0.2)
 
         else:
@@ -211,11 +233,9 @@ def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False,
         animation.setEasingCurve(style)
 
         if expanding == True:
-            if start[1] <= end[1]:
-                if attribute == "maximumSize":
-                    [animation.finished.connect(x) for x in [lambda: element.setMaximumHeight(1699999), lambda: element.setMinimumHeight(0)]]
+            [animation.finished.connect(x) for x in [lambda: element.setMaximumHeight(1699999), lambda: element.setMinimumHeight(0)]]
+            [animation.finished.connect(x) for x in [lambda: element.setMaximumWidth(1699999), lambda: element.setMinimumWidth(0)]]
 
-        # Set duration
         animation.setDuration(duration)
 
         # Start animation and delete when finished

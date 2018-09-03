@@ -2,6 +2,7 @@ __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
+from . import animation
 
 import pymel.core as pm
 
@@ -130,7 +131,7 @@ class valueButton(QtWidgets.QToolButton):
         # Aninmate size
         #animateWidgetSize(self, start=(30, height), end=((width * 2), height),duration=3000,attributelist=("minimumSize"))
         #propertyAnimation(start=[0,height], end=[width,width], duration=600, object=self, property="minimumSize")
-        propertyAnimation(start=[width,height], end=[newWidth,height], duration=600, object=self, property="maximumSize", mode="OutExpo")
+        animation.propertyAnimation(start=[width,height], end=[newWidth,height], duration=600, object=self, property="maximumSize", mode="OutExpo")
         #propertyAnimation(start=[width, height], end=[newWidth, height], duration=600, object=self, property="minimumSize", mode="OutExpo")
 
 
@@ -142,7 +143,7 @@ class valueButton(QtWidgets.QToolButton):
         # Measure text
         metrics = QtGui.QFontMetrics(self.font())
         newWidth = metrics.width(input) + 20
-        propertyAnimation(start=[(newWidth - 20), height], end=[newWidth, height], duration=500, object=self, property="maximumSize", mode="OutExpo")
+        animation.propertyAnimation(start=[(newWidth - 20), height], end=[newWidth, height], duration=500, object=self, property="maximumSize", mode="OutExpo")
 
     def get_value(self):
         if self.value != None:
@@ -151,11 +152,11 @@ class valueButton(QtWidgets.QToolButton):
             else: return self.value
 
     def enterEvent(self, event):
-        fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
+        animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
         # self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
 
     def leaveEvent(self, event):
-        fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,object=self.opacityEffect)
+        animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,object=self.opacityEffect)
         # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
 
 class dropButton(QtWidgets.QPushButton):
