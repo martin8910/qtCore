@@ -197,7 +197,7 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
 
 
 # Version 1.5 of the aninmation widgetsize that works for horizontal elements as well
-def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False):
+def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False, bounce=True):
     '''Animate an objects height'''
 
     # Set automatic duration if not set
@@ -224,9 +224,11 @@ def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False,
         # Create easing style
         style = QtCore.QEasingCurve()
         if start[1] <= end[1]:
-            style.setType(QtCore.QEasingCurve.OutBounce)
-            #style.setType(QtCore.QEasingCurve.OutExpo)
-            style.setAmplitude(0.2)
+            if bounce:
+                style.setType(QtCore.QEasingCurve.OutBounce)
+                style.setAmplitude(0.2)
+            else:
+                style.setType(QtCore.QEasingCurve.OutExpo)
 
         else:
             style.setType(QtCore.QEasingCurve.InOutQuart)

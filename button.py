@@ -3,8 +3,15 @@ __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
 from . import animation
+from . import dialog
+from . import icon as qt_icon
+
+import os
 
 import pymel.core as pm
+
+relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
+
 
 class fadeButton(QtWidgets.QToolButton):
     """Create star-icon on card """
@@ -215,6 +222,14 @@ class pathButton(QtWidgets.QPushButton):
         # Initialise value
         self.value = None
         self.pathField = None
+        self.mode = "Directory"
+        self.filter = None
+        #self.filter = "Maya file(*.mb)"
+
+        icon = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + "folderIcon.svg"))
+        print "ICON:", relativePath + os.sep + "icons" + os.sep + "folderIcon.svg"
+        self.setIcon(icon)
+
 
     def add_value(self):
         print "Add a value to me"
@@ -238,7 +253,7 @@ class pathButton(QtWidgets.QPushButton):
             else: return self.value
 
     def add_path(self):
-        file = picker_dialog(mode="ExistingFile", filter="Maya file(*.mb)")
+        file = dialog.picker_dialog(mode=self.mode, filter="Maya file(*.mb)")
         print file
         if self.pathField != None:
             self.pathField.setText(file[0])

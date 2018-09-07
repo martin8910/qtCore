@@ -4,13 +4,17 @@ __email__ = "hello@deerstranger.com"
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
 from .context_maya import get_window
 
+import os
+from main import qtUiLoader
+relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
+
 
 ###################################################################################################
 # Dialogs
 ###################################################################################################
 
 def progress_window(max=100, title="Operation in progress."):
-    progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=get_window)
+    progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=get_window())
     return progress_window
 
 def yesCancelDialog(title="Remove action", message="Are you sure you wanna remove this action?"):
@@ -84,12 +88,17 @@ def picker_dialog(mode="AnyFile", filter=None, message="Open file/folder"):
 
     return output
 
-def activatePopup(button, text, header="Info", icon="infoIcon"):
+def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None, action=None):
     window = button.parent().window()
     '''Create a popup object from the current sender'''
     global popup
     popup = info_popup(widget=window)
     popup.setText(text)
+    if actionText != None:
+        popup.set_action_text(actionText)
+        popup.set_action(action)
+
+
 
     popup.setHeader(header)
     popup.setIcon(icon)

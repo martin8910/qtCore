@@ -5,3 +5,4 @@ from main import *
 import context_maya
 from treeWidget import *
 import icon
+import widgets
