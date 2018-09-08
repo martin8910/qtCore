@@ -25,12 +25,12 @@ def create_header(title="My Amazing header", layout=None, icon=None):
 
     return headerWidgetHolder
 
-def create_simple_card(name="My Amazing Card", layout=None, icon=None, info=None, path=None):
+def create_simple_card(title="My Amazing Card", layout=None, icon=None, info=None, path=None, height=20):
     # Create instance
     cardWidget = card_simple_ui()
 
     # Set name
-    cardWidget.setTitle(name)
+    cardWidget.setTitle(title)
 
     if icon != None: cardWidget.setIcon(icon, absolute=True)
 
@@ -42,7 +42,7 @@ def create_simple_card(name="My Amazing Card", layout=None, icon=None, info=None
 
     # Set a name of the widget to the WidgetItem
     cardWidgetHolder.setData(109, cardWidget)
-    cardWidgetHolder.setSizeHint(QtCore.QSize(150, 20))
+    cardWidgetHolder.setSizeHint(QtCore.QSize(150, height))
 
     # Add instance to list
     layout.setItemWidget(cardWidgetHolder, cardWidget)
@@ -241,6 +241,9 @@ class card_simple_ui(QtWidgets.QWidget):
         #self.mainFrame.setSize(QtCore.QSize(100, 35))
         # Create discription label
         self.nameLabel = QtWidgets.QLabel(self.mainFrame)
+        #self.nameLabel.setSizePolicy(QtCore.QSizePolicy.Expanding, QtCore.QSizePolicy.Expanding)
+        self.nameLabel.setAlignment(QtCore.Qt.AlignCenter)
+
         self.infoButton = QtWidgets.QToolButton()
         self.infoButton.setText("?")
         self.infoButton.setStyleSheet("background-color: rgb(250,250,0,100);color: rgb(0,0,0), border-radius: 3px;")

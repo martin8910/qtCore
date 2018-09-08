@@ -227,24 +227,23 @@ class pathButton(QtWidgets.QPushButton):
         #self.filter = "Maya file(*.mb)"
 
         icon = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + "folderIcon.svg"))
-        print "ICON:", relativePath + os.sep + "icons" + os.sep + "folderIcon.svg"
         self.setIcon(icon)
+        # Set color of button
+        self.setStyleSheet('background-color: rgb(250,250,250,0')
+        self.setFlat(True)
 
 
     def add_value(self):
-        print "Add a value to me"
         # Get current selection from the scene and add as values to this object
         selection = pm.ls(sl=True)
         if len(selection) >= 1:
             self.value = selection
-            #self.value = [object.name() for object in selection]
             valueName = [object.name() for object in selection]
 
             # Set text of button
             self.setText(",".join(valueName)[:(int(self.width() * 0.15))])
 
-            # Set color of button
-            self.setStyleSheet('background-color: rgb(250,250,250,200')
+
 
     def get_value(self):
         if self.value != None:
@@ -253,7 +252,8 @@ class pathButton(QtWidgets.QPushButton):
             else: return self.value
 
     def add_path(self):
-        file = dialog.picker_dialog(mode=self.mode, filter="Maya file(*.mb)")
+        file = dialog.picker_dialog(mode=self.mode, filter=self.filter)
         print file
+        print len(file)
         if self.pathField != None:
             self.pathField.setText(file[0])
