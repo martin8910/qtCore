@@ -3,6 +3,10 @@ __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
 from .context_maya import get_window
+from . import icon as qt_icon
+from . import animation
+
+
 
 import os
 from main import qtUiLoader
@@ -129,7 +133,7 @@ class info_popup(QtWidgets.QWidget):
         #print point
 
         # Set image
-        iconFile = load_svg((relativePath + os.sep + "icons" + os.sep + "plugIcon.svg"),size=(15,15))
+        iconFile = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + "plugIcon.svg"),size=(15,15))
         self.ui.icon.setIcon(iconFile)
 
         # map that point as a global position
@@ -147,8 +151,8 @@ class info_popup(QtWidgets.QWidget):
 
 
     def hide(self):
-        fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
-        slideWindowBothAnimation(start=(0, 0), end=(30, 0), duration=150, object=self)
+        animation.fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
+        animation.slideWindowBothAnimation(start=(0, 0), end=(30, 0), duration=150, object=self)
         #self.deleteLater()
 
     def setText(self, text):
@@ -169,7 +173,7 @@ class info_popup(QtWidgets.QWidget):
         global_point = QtGui.QCursor.pos()
         #self.adjustSize()
         self.move(global_point - QtCore.QPoint((self.width()) - 10, self.height() - 10))
-        slideWindowBothAnimation(start=(30, 0), end=(0, 0), duration=400, object=self)
+        animation.slideWindowBothAnimation(start=(30, 0), end=(0, 0), duration=400, object=self)
         self.ui.infoLabel.adjustSize()
 
     def setHeader(self, text):
@@ -177,9 +181,9 @@ class info_popup(QtWidgets.QWidget):
 
     def setIcon(self, text):
         # Set image
-        iconFile = load_svg((relativePath + os.sep + "icons" + os.sep + text + ".svg"),size=(15,15))
+        iconFile = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + text + ".svg"),size=(15,15))
         self.ui.icon.setIcon(iconFile)
 
     def closeEvent(self, event):
         event.accept()
-        fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
+        animation.fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
