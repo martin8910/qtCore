@@ -146,8 +146,6 @@ class info_popup(QtWidgets.QWidget):
         self.ui.closeButton.clicked.connect(self.hide)
         self.setAttribute(QtCore.Qt.WA_ShowWithoutActivating)
 
-        #self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-
 
 
     def hide(self):
