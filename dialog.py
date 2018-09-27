@@ -105,6 +105,7 @@ def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None,
     popup.setHeader(header)
     popup.setIcon(icon)
     popup.show()
+
 class info_popup(QtWidgets.QWidget):
     def __init__(self, parent = None, widget=None):
         super(info_popup, self).__init__()
