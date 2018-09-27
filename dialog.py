@@ -17,7 +17,7 @@ relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 # Dialogs
 ###################################################################################################
 
-def progress_window(max=100, title="Operation in progress."):
+def progress_window(max=100, title="Operatio n in progress."):
     progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=get_window())
     return progress_window
 
@@ -102,12 +102,9 @@ def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None,
         popup.set_action_text(actionText)
         popup.set_action(action)
 
-
-
     popup.setHeader(header)
     popup.setIcon(icon)
     popup.show()
-
 class info_popup(QtWidgets.QWidget):
     def __init__(self, parent = None, widget=None):
         super(info_popup, self).__init__()
@@ -119,7 +116,9 @@ class info_popup(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
 
-        #self.frame.adjustSize()
+        #Hide action on default
+        self.ui.actionButton.hide()
+        self.executeAction = None
 
 
         # Tag this widget as a popup
@@ -127,6 +126,7 @@ class info_popup(QtWidgets.QWidget):
         self.setAutoFillBackground(True)
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
+        self.ui.actionButton.clicked.connect(self.execute_action)
 
         # calculate the botoom right point from the parents rectangle
         #point = widget.srect().bottomRight()
@@ -146,12 +146,42 @@ class info_popup(QtWidgets.QWidget):
         self.ui.closeButton.clicked.connect(self.hide)
         self.setAttribute(QtCore.Qt.WA_ShowWithoutActivating)
 
+    def mousePressEvent(self, event):
+        self.offset = event.pos()
+
+    def mouseMoveEvent(self, event):
+        try:
+            x = event.globalX()
+            y = event.globalY()
+            x_w = self.offset.x()
+            y_w = self.offset.y()
+            self.move(x - x_w, y - y_w)
+        except:
+            pass
 
 
     def hide(self):
         animation.fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
         animation.slideWindowBothAnimation(start=(0, 0), end=(30, 0), duration=150, object=self)
         #self.deleteLater()
+
+    def set_action_text(self, input):
+        self.ui.actionButton.setText(input)
+        self.ui.actionButton.show()
+
+    def set_action(self, action=None):
+        if action != None:
+            self.executeAction = action
+            self.ui.actionButton.show()
+
+    def execute_action(self):
+        print self.executeAction
+        if self.executeAction != None:
+            exec(self.executeAction)
+
+        # Close popup
+        self.hide()
+
 
     def setText(self, text):
         self.ui.infoLabel.setText(text)
@@ -163,10 +193,6 @@ class info_popup(QtWidgets.QWidget):
 
         # Set small size to the fill out with what it needs
         self.resize(20, 20)  # width, height
-
-
-        #self.resi
-
 
         global_point = QtGui.QCursor.pos()
         #self.adjustSize()
@@ -185,3 +211,5 @@ class info_popup(QtWidgets.QWidget):
     def closeEvent(self, event):
         event.accept()
         animation.fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
+
+
