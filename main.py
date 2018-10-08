@@ -100,6 +100,17 @@ def load_svg(iconPath, size=(20,20)):
 
     return icon
 
+
+def get_index_in_layout(item):
+    '''Return a position index of an item in a widgetss children'''
+    index = [num for num, object in enumerate(item.parent().children()) if object == item]
+    if len(index) != 0:
+        return index[0]
+    else:
+        print "ERROR: Item not found in layout"
+        return -1
+
+
 def clearLayout(layout):
     '''Clear input layout of its content'''
     if layout != None:
