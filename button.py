@@ -58,13 +58,13 @@ class fadeButton(QtWidgets.QToolButton):
 
     def enterEvent(self, event):
         if self.activeButton is False:
-            qtCore.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,
+            animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,
                                  object=self.opacityEffect)
             # self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
 
     def leaveEvent(self, event):
         if self.activeButton is False:
-            qtCore.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
+            animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
                                  object=self.opacityEffect)
             # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
 
