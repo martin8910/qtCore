@@ -91,7 +91,7 @@ class valueButton(QtWidgets.QToolButton):
         # Set style
 
         self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}"
-        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0,250,0);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}"
+        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}"
         self.setStyleSheet(self.inactiveStyleSheet)
     def add_value(self):
         # Get current selection from the scene and add as values to this object
