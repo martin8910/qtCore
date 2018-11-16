@@ -2,14 +2,14 @@ __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
-from .context_maya import get_window
-from . import icon as qt_icon
-from . import animation
+import context_maya
+import icon as qt_icon
+import animation
 
 
 
 import os
-from main import qtUiLoader
+import main
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
 
@@ -18,7 +18,7 @@ relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 ###################################################################################################
 
 def progress_window(max=100, title="Operatio n in progress."):
-    progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=get_window())
+    progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=context_maya.get_window())
     return progress_window
 
 def yesCancelDialog(title="Remove action", message="Are you sure you wanna remove this action?"):
@@ -109,7 +109,7 @@ def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None,
 class info_popup(QtWidgets.QWidget):
     def __init__(self, parent = None, widget=None):
         super(info_popup, self).__init__()
-        self.ui = qtUiLoader("{}popupCardSimple.ui".format(relativePath + os.sep + "ui" + os.sep))
+        self.ui = main.qtUiLoader("{}popupCardSimple.ui".format(relativePath + os.sep + "ui" + os.sep))
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.ui)
         self.layout.setSpacing(0)
@@ -234,7 +234,7 @@ def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None,
 class info_popup(QtWidgets.QWidget):
     def __init__(self, parent = None, widget=None):
         super(info_popup, self).__init__()
-        self.ui = qtUiLoader("{}popupCardSimple.ui".format(relativePath + os.sep + "ui" + os.sep))
+        self.ui = main.qtUiLoader("{}popupCardSimple.ui".format(relativePath + os.sep + "ui" + os.sep))
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.ui)
         self.layout.setSpacing(0)

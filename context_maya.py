@@ -1,8 +1,8 @@
 from maya import OpenMayaUI
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin, MayaQDockWidget
 
-from .external.Qt import QtWidgets
-from . import main
+from external.Qt import QtWidgets
+import main
 import animation
 
 
@@ -13,6 +13,7 @@ try:
 except:
     from shiboken2 import wrapInstance
     import shiboken2 as shiboken
+
 
 
 def get_window():
@@ -33,7 +34,6 @@ class generic_dockable_window(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-
         #Set unice objectname
         self.setObjectName(str(self.objectName))
 
@@ -51,4 +51,29 @@ class generic_dockable_window(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
     def animate_window_size(self, start=(300,400),end=(500,300),duration=800):
         animation.resizeWindowAnimation(start=start, end=end, duration=800, object=self.window(),attribute="size")
+
+
+class generic_window(QtWidgets.QWidget):
+    def __init__(self, interfacePath, parent=None):
+        super(generic_window, self).__init__(parent)
+        self.interfacePath = interfacePath
+        self.setWindowTitle("Unnamed")
+        self.ui = main.qtUiLoader(self.interfacePath)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.ui)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+
+        #Set unice objectname
+        self.setObjectName(str(self.objectName))
+
+        # Install filter
+        self.installEventFilter(self)
+
+    def animate_window_size(self, start=(300,400),end=(500,300),duration=800):
+        pass
+        #animation.resizeWindowAnimation(start=start, end=end, duration=800, object=self.window(),attribute="size")
 

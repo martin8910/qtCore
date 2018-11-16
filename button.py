@@ -2,9 +2,9 @@ __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
-from . import animation
-from . import dialog
-from . import icon as qt_icon
+import animation
+import dialog
+import icon as qt_icon
 
 import os
 
