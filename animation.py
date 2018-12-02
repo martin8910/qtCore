@@ -176,13 +176,16 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
     # Set Duration
     animation.setDuration(duration)
 
+    # Get default attribute from name:
     # Set start values
     if start[0] == "current":
-        startValueX = object.iconSize().height()
+        if property == "iconSize":
+            startValueX = object.iconSize().height()
     else:
         startValueX = start[0]
     if start[1] == "current":
-        startValueY = object.iconSize().width()
+        if property == "iconSize":
+            startValueY = object.iconSize().width()
     else:
         startValueY = start[1]
     animation.setStartValue(QtCore.QSize(startValueX, startValueY))
@@ -197,7 +200,7 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
 
 
 # Version 1.5 of the aninmation widgetsize that works for horizontal elements as well
-def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False, bounce=True):
+def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False, bounce=True,finishAction=None):
     '''Animate an objects height'''
 
     # Set automatic duration if not set
@@ -239,6 +242,9 @@ def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False,
             [animation.finished.connect(x) for x in [lambda: element.setMaximumWidth(1699999), lambda: element.setMinimumWidth(0)]]
 
         animation.setDuration(duration)
+
+        if finishAction != None:
+            animation.finished.connect(finishAction)
 
         # Start animation and delete when finished
         animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)

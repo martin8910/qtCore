@@ -74,61 +74,6 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
     # Animate
     #animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
 
-class fadeButton(QtWidgets.QToolButton):
-    """Create star-icon on card """
-
-    def __init__(self, parent):
-        super(fadeButton, self).__init__()
-        # QToolButton.__init__(self, parent)
-
-        self.width = 20
-        self.height = 20
-        self.opacity = 0.3
-        self.endOpacity = 0.7
-        self.inAnimDuration = 300
-        self.outAnimDuration = 800
-
-        # Create opacity effect
-        self.opacityEffect = QtWidgets.QGraphicsOpacityEffect(self)
-        self.setGraphicsEffect(self.opacityEffect)
-        self.setAutoFillBackground(True)
-        self.setOpacity(self.opacity)
-        self.activeButton = False
-
-        # Set sizing policy on button
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
-
-        # Set cursor
-        self.setCursor(QtCore.Qt.PointingHandCursor)
-
-        # Set sizing of the button
-        # self.setSize(self.width, self.height)
-        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-
-        self.setStyleSheet('''QToolButton {color: rgb(250, 250, 250);background-color: rgb(0, 250, 0,0);border-style: None;border-width: 0px;}QToolButton:menu-indicator { image: none; }''')
-
-    def setOpacity(self, opacity):
-        self.opacityEffect.setOpacity(opacity)
-        self.opacity = opacity
-
-    def setSize(self, width, height):
-        self.setIconSize(QtCore.QSize(width, height))
-
-        self.width = width
-        self.height = height
-
-    def enterEvent(self, event):
-        if self.activeButton is False:
-            qtCore.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,
-                                 object=self.opacityEffect)
-            # self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-
-    def leaveEvent(self, event):
-        if self.activeButton is False:
-            qtCore.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
-                                 object=self.opacityEffect)
-            # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-
 
 class valueButton(QtWidgets.QToolButton):
     '''Create a button that can store values for us'''
@@ -366,26 +311,6 @@ def set_value(object, value):
 
     return value
 
-def connect_value_change(object, connection=None):
-    '''Connect the changecommand for a object based on its type'''
-    if type(object) == QtWidgets.QLineEdit:
-        object.textChanged.connect(connection)
-    elif type(object) == QtWidgets.QPushButton:
-        object.clicked.connect(connection)
-    elif "valueButton" in str(type(object)):  # ValueButton
-        object.clicked.connect(connection)
-    elif type(object) == QtWidgets.QLabel:
-        print "Setting connection on a label is not supported for now"
-    elif type(object) == QtWidgets.QSpinBox:
-        object.valueChanged.connect(connection)
-    elif type(object) == QtWidgets.QDoubleSpinBox:
-        object.valueChanged.connect(connection)
-    elif type(object) == QtWidgets.QComboBox:
-        object.currentIndexChanged.connect(connection)
-    elif type(object) == QtWidgets.QCheckBox:
-        object.stateChanged.connect(connection)
-    else:
-        print "No supported type found for '{}'".format(type(object))
 
 
 # Load the svg

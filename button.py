@@ -7,11 +7,9 @@ import dialog
 import icon as qt_icon
 
 import os
-
 import pymel.core as pm
 
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
-
 
 class fadeButton(QtWidgets.QToolButton):
     """Create star-icon on card """
@@ -50,6 +48,12 @@ class fadeButton(QtWidgets.QToolButton):
         self.opacityEffect.setOpacity(opacity)
         self.opacity = opacity
 
+    def setAnimateOpacity(self, opacity, duration=500):
+        #self.opacityEffect.setOpacity(opacity)
+        animation.fadeAnimation(start="current", end=opacity, duration=duration,object=self.opacityEffect)
+        QtWidgets.QApplication.processEvents()
+        self.opacity = opacity
+
     def setSize(self, width, height):
         self.setIconSize(QtCore.QSize(width, height))
 
@@ -67,6 +71,64 @@ class fadeButton(QtWidgets.QToolButton):
             animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
                                  object=self.opacityEffect)
             # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+    def mousePressEvent(self, event):
+        animation.fadeAnimation(start="current", end=1, duration=self.outAnimDuration, object=self.opacityEffect)
+
+
+class popButton(QtWidgets.QPushButton):
+    """Create star-icon on card """
+
+    def __init__(self, parent):
+        super(popButton, self).__init__()
+        # QToolButton.__init__(self, parent)
+
+        self.width = 20
+        self.height = 20
+        self.normalIconSize = 20
+        self.inAnimDuration = 200
+        self.outAnimDuration = 200
+        self.growValue = 25
+
+        # Set sizing policy on button
+        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
+
+        self.clicked.connect(self.clickEvent)
+
+        # Create opacity effect
+        self.opacityEffect = QtWidgets.QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacityEffect)
+        self.setAutoFillBackground(True)
+        self.opacityEffect.setOpacity(1)
+
+        # Set sizing of the button
+        # self.setSize(self.width, self.height)
+        #self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+
+        self.setStyleSheet('''QPushButton {color: rgb(250, 250, 250);background-color: rgb(0, 250, 0,0);border-style: None;border-width: 0px;}QPushButton:menu-indicator { image: none; }''')
+
+
+    def setSize(self, width, height):
+        self.setIconSize(QtCore.QSize(self.normalIconSize, self.normalIconSize))
+
+        self.width = width
+        self.height = height
+
+    def enterEvent(self, event):
+        animation.propertyAnimation(start=["current", "current"], end=[self.growValue, self.growValue], duration=self.inAnimDuration, object=self,property="iconSize", mode="OutExpo")
+
+    def leaveEvent(self, event):
+        animation.propertyAnimation(start=[self.growValue, self.growValue], end=[self.normalIconSize, self.normalIconSize], duration=self.outAnimDuration, object=self,property="iconSize", mode="OutExpo")
+    def clickEvent(self):
+        animation.fadeAnimation(start="current", end=0.5, duration=200, object=self.opacityEffect)
+        animation.propertyAnimation(start=["current", "current"], end=[(self.width * 0.6), (self.height * 0.6)], duration=200, object=self,property="iconSize", mode="OutExpo", finishAction=self.fadeUp)
+
+
+    def fadeUp(self):
+        animation.propertyAnimation(start=["current", "current"], end=[self.growValue, self.growValue], duration=300, object=self,property="iconSize", mode="OutExpo")
+        animation.fadeAnimation(start="current", end=1, duration=self.outAnimDuration, object=self.opacityEffect)
+
+
+
 
 class valueButton(QtWidgets.QToolButton):
     '''Create a button that can store values for us'''

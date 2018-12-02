@@ -20,7 +20,7 @@ def svg_icon(button=None, path=None):
     '''Load a svg icon onto a button respecting its size'''
     if type(button) == QtWidgets.QPushButton:
         size = (button.iconSize().width(), button.iconSize().height())
-    elif "fadeButton" in str(type(button)):
+    elif "fadeButton" in str(type(button)) or "popButton" in str(type(button)):
         size = (button.iconSize().width(), button.iconSize().height())
     elif type(button) == QtWidgets.QToolButton:
         size = (button.iconSize().width(), button.iconSize().height())
@@ -31,7 +31,7 @@ def svg_icon(button=None, path=None):
 
     svg_pixmap = load_svg_pixmap(path, size=(50, 50))
 
-    if type(button) == QtWidgets.QPushButton or "fadeButton" in str(type(button)):
+    if type(button) == QtWidgets.QPushButton or "fadeButton" in str(type(button)) or "popButton" in str(type(button)):
         button.setIcon(QtGui.QIcon(svg_pixmap))
     elif type(button) == QtWidgets.QLabel:
         button.setPixmap(svg_pixmap)
