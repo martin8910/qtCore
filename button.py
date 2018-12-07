@@ -71,8 +71,13 @@ class fadeButton(QtWidgets.QToolButton):
             animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
                                  object=self.opacityEffect)
             # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-    def mousePressEvent(self, event):
-        animation.fadeAnimation(start="current", end=1, duration=self.outAnimDuration, object=self.opacityEffect)
+    def pressEvent(self, event):
+        print "Running click event"
+        animation.fadeAnimation(start="current", end=0.3, duration=200, object=self.opacityEffect, finishAction=self.fadeUp)
+
+    def fadeUp(self):
+        print "Fade up effect"
+        animation.fadeAnimation(start="current", end=self.opacity, duration=1500, object=self.opacityEffect)
 
 
 class popButton(QtWidgets.QPushButton):
