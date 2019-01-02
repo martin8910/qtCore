@@ -49,3 +49,68 @@ def svg_icon(button=None, path=None):
             print "Manage to set the size from icon.setIcon()"
         except: pass
     return svg_pixmap
+
+def pixmap_on_icon(icon, path):
+    '''Load a pixmap icon from a path'''
+    if type(icon) == QtWidgets.QPushButton:
+
+        # QPixmap pixmap(imageFileName);
+        pixmap = QtGui.QPixmap(path)
+
+        # if (pixmap.isNull()) return false;
+        #
+        # int w = std::min(pixmap.width(),  label->maximumWidth());
+        # int h = std::min(pixmap.height(), label->maximumHeight());
+
+        width_factor = pixmap.width() / icon.size().width()
+        height_factor = pixmap.height() / icon.size().height()
+        print pixmap.width(), pixmap.height()
+        print icon.size().width(), icon.size().height()
+        print "--------"
+
+        #
+        #
+
+        # pixmap = pixmap.scaled(QSize(w, h), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        #pixmap.scaled(QtCore.QSize(icon.size().width(), icon.size().height()), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        #pixmap.scaled(QtCore.QSize(icon.size().width(), icon.size().height()), QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation)
+        #QtCore.QSize(icon.size().width(), icon.size().height())
+
+        #pixmap.scaled(640, 440, QtCore.Qt.KeepAspectRatio)
+        pixmap.scaled(640, 440)
+
+        # label->setPixmap(pixmap);
+        icon.setIcon(pixmap)
+
+
+
+
+
+
+
+        #pixmap.scaledToHeight(icon.size().width())
+        #pixmap.scaledToWidth(icon.size().height())
+        #size = QtCore.QSize(icon.size().width(), icon.size().height())
+        #icon.setScaledContents(True)
+        #pixmap.scaled(size, QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.SmoothTransformation)
+
+        #pixmap.setSize(size)
+
+        #icon.setIcon(pixmap)
+    else:
+        icon.setPixmap(QtGui.QPixmap(path))
+
+
+
+#
+# static bool SetLabelImage(QLabel *label, QString imageFileName)
+# {
+#     QPixmap pixmap(imageFileName);
+#     if (pixmap.isNull()) return false;
+#
+#     int w = std::min(pixmap.width(),  label->maximumWidth());
+#     int h = std::min(pixmap.height(), label->maximumHeight());
+#     pixmap = pixmap.scaled(QSize(w, h), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+#     label->setPixmap(pixmap);
+#     return true;
+# }

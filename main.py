@@ -155,6 +155,14 @@ def select_item_by_text(listWidget, text):
         print "No supported type provided for 'qtCore.select_item_by_text'"
         print "TYPE:", type(listWidget)
 
+def add_items_to_layout(layout, items):
+    for item in items:
+        if type(item) == QtWidgets.QSpacerItem:
+            layout.addItem(item)
+        else:
+            layout.addWidget(item)
+
+
 def centerWidgetOnScreen(widget):
     '''Center a given widget on the active screen'''
     frameGm = widget.frameGeometry()
@@ -187,6 +195,15 @@ class vectorInput(QtWidgets.QWidget):
         self.ui.value01.setValue(value01)
         self.ui.value02.setValue(value02)
         self.ui.value03.setValue(value03)
+
+
+def create_spacer(mode="vertical"):
+    if mode == "vertical":
+        spacer = QtWidgets.QSpacerItem(20, 1000, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    if mode == "horizontal":
+        spacer = QtWidgets.QSpacerItem(1000, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+    return spacer
 
 class QHLine(QtWidgets.QFrame):
     '''Class to make a horizontal line break'''

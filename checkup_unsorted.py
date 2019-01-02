@@ -2,7 +2,7 @@ from core.external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
 import os
 windowAnim = True
 
-import pymel.core as pm
+#import pymel.core as pm
 
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 

@@ -201,7 +201,7 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
 
 # Version 1.5 of the aninmation widgetsize that works for horizontal elements as well
 def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False, bounce=True,finishAction=None):
-    '''Animate an objects height'''
+    '''Animate an objects width/height'''
 
     # Set automatic duration if not set
     if duration == False:
@@ -237,12 +237,25 @@ def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False,
             style.setType(QtCore.QEasingCurve.InOutQuart)
         animation.setEasingCurve(style)
 
+        #animation.finished.connect(lambda: element.setBaseSize(end[0], end[1]))
+
+        print "VALUES:", end[0], end[1]
+
+
+
         if expanding == True:
-            [animation.finished.connect(x) for x in [lambda: element.setMaximumHeight(1699999), lambda: element.setMinimumHeight(0)]]
-            [animation.finished.connect(x) for x in [lambda: element.setMaximumWidth(1699999), lambda: element.setMinimumWidth(0)]]
+            if attribute == "maximumSize":
+                [animation.finished.connect(x) for x in [lambda: element.setMaximumHeight(1699999), lambda: element.setMinimumHeight(0)]]
+                [animation.finished.connect(x) for x in [lambda: element.setMaximumWidth(1699999), lambda: element.setMinimumWidth(0)]]
+                #animation.finished.connect(lambda: element.setBaseSize(100,400))
+                #animation.finished.connect(lambda: element.setSizeHint(QtCore.QSize(end[0], end[1])))
+
+
+
 
         animation.setDuration(duration)
 
+        # Connect Finish Action
         if finishAction != None:
             animation.finished.connect(finishAction)
 

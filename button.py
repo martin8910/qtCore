@@ -7,7 +7,10 @@ import dialog
 import icon as qt_icon
 
 import os
-import pymel.core as pm
+try:
+    import pymel.core as pm
+except:
+    pass
 
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
@@ -33,7 +36,7 @@ class fadeButton(QtWidgets.QToolButton):
         self.activeButton = False
 
         # Set sizing policy on button
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
+        #self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
 
         # Set cursor
         self.setCursor(QtCore.Qt.PointingHandCursor)

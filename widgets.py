@@ -296,3 +296,30 @@ class card_simple_ui(QtWidgets.QWidget):
 
     def get_path(self):
         return self.path
+
+
+def create_custom_widget(custom_widget=None, listWidget=None, size=(150,150)):
+    # Create instance
+    headerWidget = custom_widget()
+
+    # Set name
+    #headerWidget.set_title(title)
+
+    #if icon != None: headerWidget.setIcon(icon, absolute=True)
+
+    # Add widget and set card size
+    headerWidgetHolder = QtWidgets.QListWidgetItem(listWidget)
+
+    headerWidgetHolder.setFlags(QtCore.Qt.ItemIsSelectable == False)
+
+    # Set a name of the widget to the WidgetItem
+    headerWidgetHolder.setData(109, headerWidget)
+    # headerWidgetHolder.setData(100, name)
+    headerWidgetHolder.setSizeHint(QtCore.QSize(size[0], size[1]))
+
+    # Add instance to list
+    listWidget.setItemWidget(headerWidgetHolder, headerWidget)
+
+    return headerWidgetHolder
+
+
