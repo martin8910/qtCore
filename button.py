@@ -148,6 +148,9 @@ class valueButton(QtWidgets.QToolButton):
         self.multiple = False
         self.originalTitle = None
 
+        # Store other objects that should update when this button is updated
+        self.value_connector = []
+
 
         # Create opacity effect
         self.opacity = 0.8
@@ -158,11 +161,20 @@ class valueButton(QtWidgets.QToolButton):
         self.setGraphicsEffect(self.opacityEffect)
         self.setAutoFillBackground(True)
 
+        self.clicked.connect(self.add_value)
+
         # Set style
 
         self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}"
         self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}"
         self.setStyleSheet(self.inactiveStyleSheet)
+    def update_valueItems(self):
+        if len(self.value_connector) is not 0:
+            for object in self.value_connector:
+                valueName = [o.name() for o in self.value]
+                valueName = "".join(valueName)
+                object.setText(valueName)
+
     def add_value(self):
         # Get current selection from the scene and add as values to this object
         selection = pm.ls(sl=True)
@@ -171,16 +183,19 @@ class valueButton(QtWidgets.QToolButton):
             valueName = [object.name() for object in selection]
             valueName = ",".join(valueName)[:(int(self.width() * 0.15))]
 
+
             self.set_value(selection, valueName=valueName)
             self.opacity = 1
             self.setStyleSheet(self.activeStyleSheet)
+            # Set value on attached objects if any
+            self.update_valueItems()
 
         else:
             self.opacity = 0.6
 
             dialog.activatePopup(self, "You dont have any selection")
-            self.setStyleSheet(self.inactiveStyleSheet)
             self.set_value(None, valueName=self.originalTitle)
+            self.setStyleSheet(self.inactiveStyleSheet)
     def reset_value(self):
         self.setStyleSheet("")
     def set_value(self, value, valueName="Assigned"):
@@ -189,28 +204,18 @@ class valueButton(QtWidgets.QToolButton):
 
         # Set value in button
         self.value = value
+        if value is not None:
+            self.setStyleSheet(self.activeStyleSheet)
         # Set text of button
-
-        # Calculate new size
-
         self.setText(valueName)
 
 
-
-        # Measure text
+        # Calculate new size
         metrics = QtGui.QFontMetrics(self.font())
         newWidth = metrics.width(valueName) + 20
 
-
-
-        # Set color of button
-        #self.setStyleSheet("padding: 5px;border-radius: 5px;\nbackground-color: rgb(0,153,51);\ncolor: rgb(250,250,250,200);")
-
         # Aninmate size
-        #animateWidgetSize(self, start=(30, height), end=((width * 2), height),duration=3000,attributelist=("minimumSize"))
-        #propertyAnimation(start=[0,height], end=[width,width], duration=600, object=self, property="minimumSize")
         animation.propertyAnimation(start=[width,height], end=[newWidth,height], duration=600, object=self, property="maximumSize", mode="OutExpo")
-        #propertyAnimation(start=[width, height], end=[newWidth, height], duration=600, object=self, property="minimumSize", mode="OutExpo")
 
 
     def set_text(self, input):
@@ -237,35 +242,14 @@ class valueButton(QtWidgets.QToolButton):
         animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,object=self.opacityEffect)
         # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
 
-class dropButton(QtWidgets.QPushButton):
+class dropButton(valueButton):
     '''Create a button that can store values for us'''
     def __init__(self):
         super(dropButton, self).__init__()
 
         # Initialise value
         self.setAcceptDrops(True)
-        self.value = None
 
-    def add_value(self):
-        print "Add a value to me"
-        # Get current selection from the scene and add as values to this object
-        selection = pm.ls(sl=True)
-        if len(selection) >= 1:
-            self.value = selection
-            #self.value = [object.name() for object in selection]
-            valueName = [object.name() for object in selection]
-
-            # Set text of button
-            self.setText(",".join(valueName)[:(int(self.width() * 0.15))])
-
-            # Set color of button
-            self.setStyleSheet('background-color: rgb(250,250,250,200')
-
-    def get_value(self):
-        if self.value != None:
-            if self.multiple == False:
-                return self.value[0]
-            else: return self.value
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat('text/plain'):
