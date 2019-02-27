@@ -24,7 +24,7 @@ class fadeButton(QtWidgets.QToolButton):
         self.width = 20
         self.height = 20
         self.opacity = 0.3
-        self.endOpacity = 0.7
+        self.endOpacity = 0.8
         self.inAnimDuration = 300
         self.outAnimDuration = 800
 
@@ -45,7 +45,7 @@ class fadeButton(QtWidgets.QToolButton):
         # self.setSize(self.width, self.height)
         self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
 
-        self.setStyleSheet('''QToolButton {color: rgb(250, 250, 250);background-color: rgb(0, 250, 0,0);border-style: None;border-width: 0px;}QToolButton:menu-indicator { image: none; }''')
+        #self.setStyleSheet('''QToolButton {color: rgb(250, 250, 250);background-color: rgb(0, 250, 0,0);border-style: None;border-width: 0px;}QToolButton:menu-indicator { image: none; }''')
 
     def setOpacity(self, opacity):
         self.opacityEffect.setOpacity(opacity)
@@ -74,13 +74,14 @@ class fadeButton(QtWidgets.QToolButton):
             animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
                                  object=self.opacityEffect)
             # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-    def pressEvent(self, event):
-        print "Running click event"
-        animation.fadeAnimation(start="current", end=0.3, duration=200, object=self.opacityEffect, finishAction=self.fadeUp)
-
     def fadeUp(self):
-        print "Fade up effect"
         animation.fadeAnimation(start="current", end=self.opacity, duration=1500, object=self.opacityEffect)
+
+    # def mousePressEvent(self, event):
+    #     super(fadeButton).mousePressEvent(event)
+    #     animation.fadeAnimation(start="current", end=1, duration=200, object=self.opacityEffect,finishAction=self.fadeUp)
+
+
 
 
 class popButton(QtWidgets.QPushButton):
@@ -137,7 +138,6 @@ class popButton(QtWidgets.QPushButton):
 
 
 
-
 class valueButton(QtWidgets.QToolButton):
     '''Create a button that can store values for us'''
     def __init__(self):
@@ -165,8 +165,8 @@ class valueButton(QtWidgets.QToolButton):
 
         # Set style
 
-        self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}"
-        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 5px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}"
+        self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}"
+        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}"
         self.setStyleSheet(self.inactiveStyleSheet)
     def update_valueItems(self):
         if len(self.value_connector) is not 0:
@@ -230,7 +230,7 @@ class valueButton(QtWidgets.QToolButton):
 
     def get_value(self):
         if self.value != None:
-            if self.multiple == False:
+            if not self.multiple:
                 return self.value[0]
             else: return self.value
 
@@ -302,13 +302,11 @@ class pathButton(QtWidgets.QPushButton):
 
     def get_value(self):
         if self.value != None:
-            if self.multiple == False:
+            if not self.multiple:
                 return self.value[0]
             else: return self.value
 
     def add_path(self):
         file = dialog.picker_dialog(mode=self.mode, filter=self.filter)
-        print file
-        print len(file)
         if self.pathField != None:
             self.pathField.setText(file[0])

@@ -17,13 +17,10 @@ relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 # Dialogs
 ###################################################################################################
 
-def progress_window(max=100, title="Operatio n in progress."):
+def progress_window(max=100, title="Operation in progress."):
     progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max)
     return progress_window
 
-# def progress_window(max=100, title="Operatio n in progress."):
-#     progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max, parent=context_maya.get_window())
-#     return progress_window
 
 def yesCancelDialog(title="Remove action", message="Are you sure you wanna remove this action?"):
     # Create dialog
@@ -305,7 +302,6 @@ class info_popup(QtWidgets.QWidget):
             self.ui.actionButton.show()
 
     def execute_action(self):
-        print self.executeAction
         if self.executeAction != None:
             exec(self.executeAction)
 

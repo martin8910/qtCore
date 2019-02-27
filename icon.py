@@ -27,20 +27,22 @@ def svg_icon(button=None, path=None):
     elif type(button) == QtWidgets.QLabel:
         size = (button.width(), button.height())
     else:
-        print "Unsupported type:", type(button)
         try:
             size = (button.iconSize().width(), button.iconSize().height())
-            print "Manage to find the size from iconSize()"
-        except: size = None
+        except:
+            print "Unsupported type:", type(button)
+            size = (50,50)
 
     # Create pixmap from path
-    svg_pixmap = load_svg_pixmap(path, size=(50, 50))
+    svg_pixmap = load_svg_pixmap(path, size=size)
 
     if type(button) == QtWidgets.QPushButton or "fadeButton" in str(type(button)) or "popButton" in str(type(button)):
         button.setIcon(QtGui.QIcon(svg_pixmap))
     elif type(button) == QtWidgets.QLabel:
         button.setPixmap(svg_pixmap)
     elif type(button) == QtWidgets.QLabel:
+        button.setIcon(QtGui.QIcon(svg_pixmap))
+    elif type(button) == QtWidgets.QAction:
         button.setIcon(QtGui.QIcon(svg_pixmap))
     else:
         print "Unsupported type:", type(button)
@@ -64,9 +66,6 @@ def pixmap_on_icon(icon, path):
 
         width_factor = pixmap.width() / icon.size().width()
         height_factor = pixmap.height() / icon.size().height()
-        print pixmap.width(), pixmap.height()
-        print icon.size().width(), icon.size().height()
-        print "--------"
 
         #
         #

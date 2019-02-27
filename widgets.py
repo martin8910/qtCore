@@ -1,6 +1,16 @@
 from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
 
 import main
+import animation
+import button
+
+reload(animation)
+import icon
+import os
+
+relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
+parentPath = os.path.abspath(os.path.join(relativePath, os.pardir))
+
 def create_header(title="My Amazing header", layout=None, icon=None):
     # Create instance
     headerWidget = header_card_ui()
@@ -323,3 +333,97 @@ def create_custom_widget(custom_widget=None, listWidget=None, size=(150,150)):
     return headerWidgetHolder
 
 
+class collapsable_tab():
+    '''Create a exspandable tab that can be open or closed from a header'''
+    def __init__(self,layout=None, name="Header Title", layoutDirection="vertical"):
+
+        self.open_state = False
+        self.open_icon_path = relativePath + os.sep + "icons" + os.sep + "tab_open.svg"
+        self.closed_icon_path = relativePath + os.sep + "icons" + os.sep + "tab_closed.svg"
+        self.layoutDir = layoutDirection
+
+
+        # Create header
+        #self.header = QtWidgets.QPushButton(name)
+        self.header = button.fadeButton(layout)
+        self.header.setText(name)
+        self.header.setOpacity(0.5)
+        self.header.setIconSize(QtCore.QSize(10, 10))
+        self.header.setStyleSheet("padding-left: 5px;text-align: left;background-color: rgb(0,0,0,0);border-style: none;")
+        self.header.setMaximumHeight(25)
+        self.header.setMinimumHeight(25)
+        # Add icon to header
+        icon.svg_icon(button=self.header, path=self.closed_icon_path)
+        layout.addWidget(self.header)
+
+        # Create collapsable widget to store content in
+        self.holder = QtWidgets.QFrame()
+        self.holder.setMaximumWidth(10000)
+        self.holder.setMaximumHeight(1)
+        self.holder.setObjectName("frameHolder")
+        self.holder.setStyleSheet("QFrame#frameHolder{background-color: rgb(0,0,0,0)}")
+        layout.addWidget(self.holder)
+
+        self.holder.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+        # Add layout
+        if layoutDirection is "vertical":
+            self.layout = QtWidgets.QVBoxLayout()
+        else:
+            self.layout = QtWidgets.QHBoxLayout()
+        self.layout.setContentsMargins(5, 5, 5, 5)
+        self.layout.setSpacing(4)
+        self.holder.setLayout(self.layout)
+
+
+        self.header.clicked.connect(self.change_state)
+
+    def change_state(self, animate=True):
+        '''Change the current state of the holder'''
+        current_width = self.holder.size().width()
+        #print "WIDTH:", current_width
+        current_height = self.holder.size().height()
+        expanding = False
+
+        if self.open_state:
+            # Close the layout
+            self.open_state = False
+
+            new_height = 1
+            new_width = current_width
+
+
+            # Set closed icon
+            icon.svg_icon(button=self.header, path=self.closed_icon_path)
+        else:
+            # Open the layout
+            self.open_state = True
+
+            # Add layout spacing
+            spacing = self.layout.spacing() * 2
+            new_height = self.holder.sizeHint().height()
+            new_width = self.holder.minimumSizeHint().width()
+
+
+            if new_height is 0:
+                new_height = 200
+            expanding = True
+            icon.svg_icon(button=self.header, path=self.open_icon_path)
+
+        # Animate change
+        if animate is True:
+            animation.animateWidgetSize(self.holder, start=(current_width, current_height), end=(current_width, new_height),bounce=False, duration=600,attributelist=("maximumSize", "minimumSize"), expanding = expanding)
+            if expanding is False:
+                self.header.setAnimateOpacity(0.5)
+            else:
+                self.header.setOpacity(0.9)
+        else:
+            animation.animateWidgetSize(self.holder, start=(current_width, current_height), end=(current_width, new_height),bounce=False, duration=1,attributelist=("maximumSize", "minimumSize"), expanding = expanding)
+
+    def set_open(self):
+        '''Open the layout'''
+        pass
+
+    def set_closed(self):
+        '''Open the layout'''
+        pass

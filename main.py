@@ -2,6 +2,7 @@ __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
 from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
+import animation
 import os
 windowAnim = True
 
@@ -114,23 +115,43 @@ def get_index_in_layout(item):
 def clearLayout(layout):
     '''Clear input layout of its content'''
     if layout != None:
-        while layout.count():
-            child = layout.takeAt(0)
-            if child.widget() is not None:
-                child.widget().deleteLater()
-            elif child.layout() is not None:
-                clearLayout(child.layout())
-
-def autoFieldWidth(inputObject, offset=0, minimum=0):
+        try:
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget() is not None:
+                    child.widget().deleteLater()
+                elif child.layout() is not None:
+                    clearLayout(child.layout())
+        except: pass
+def autoFieldWidth(inputObject, offset=0, minimum=0, animate=False):
     '''Takes any object that have a "text" attribute and sets its width according to its content'''
+    current_width = inputObject.width()
+    current_height = inputObject.height()
+
     text = inputObject.text()
     metrics = QtGui.QFontMetrics(inputObject.font())
     width = metrics.width(text) + offset
     #Set field
     if width <= minimum: width = minimum
 
-    inputObject.setMaximumWidth(width)
-    inputObject.setMinimumWidth(width)
+    if animate:
+        animation = QtCore.QPropertyAnimation(inputObject, "minimumWidth", inputObject)
+
+        # Set start and end values
+        animation.setStartValue(current_width)
+        animation.setEndValue(width + offset)
+
+        # Create easing style
+        style = QtCore.QEasingCurve()
+        style.setType(QtCore.QEasingCurve.InOutQuart)
+        animation.setEasingCurve(style)
+
+        animation.setDuration(500)
+        animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
+        #animation.animateWidgetSize(inputObject, start=(current_width, current_height), end=(width, current_height), duration=600, attributelist=("maximumSize", "minimumSize"),expanding=False)
+    else:
+        inputObject.setMaximumWidth(width)
+        inputObject.setMinimumWidth(width)
 
 def selectItemByIndex(listWidget, index):
     '''Select the index of a QListWidget'''
