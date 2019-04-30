@@ -35,17 +35,12 @@ class fadeButton(QtWidgets.QToolButton):
         self.setOpacity(self.opacity)
         self.activeButton = False
 
-        # Set sizing policy on button
-        #self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
-
         # Set cursor
         self.setCursor(QtCore.Qt.PointingHandCursor)
 
         # Set sizing of the button
         # self.setSize(self.width, self.height)
         self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-
-        #self.setStyleSheet('''QToolButton {color: rgb(250, 250, 250);background-color: rgb(0, 250, 0,0);border-style: None;border-width: 0px;}QToolButton:menu-indicator { image: none; }''')
 
     def setOpacity(self, opacity):
         self.opacityEffect.setOpacity(opacity)
@@ -73,7 +68,6 @@ class fadeButton(QtWidgets.QToolButton):
         if self.activeButton is False:
             animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,
                                  object=self.opacityEffect)
-            # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
     def fadeUp(self):
         animation.fadeAnimation(start="current", end=self.opacity, duration=1500, object=self.opacityEffect)
 
@@ -145,7 +139,7 @@ class valueButton(QtWidgets.QToolButton):
 
         # Initialise value
         self.value = None
-        self.multiple = False
+        self.multiple = True
         self.originalTitle = None
 
         # Store other objects that should update when this button is updated
@@ -163,6 +157,8 @@ class valueButton(QtWidgets.QToolButton):
 
         self.clicked.connect(self.add_value)
 
+        self.textCutoff = 30
+
         # Set style
 
         self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}"
@@ -179,12 +175,21 @@ class valueButton(QtWidgets.QToolButton):
         # Get current selection from the scene and add as values to this object
         selection = pm.ls(sl=True)
         if len(selection) >= 1:
-            #self.value = [object.name() for object in selection]
-            valueName = [object.name() for object in selection]
-            valueName = ",".join(valueName)[:(int(self.width() * 0.15))]
+            if self.multiple:
+                valueName = [object.name() for object in selection]
+                #valueName = ",".join(valueName)[:(int(self.width() * 0.15))]
+                valueName = " , ".join(valueName)
+
+                print "SELECTION:", selection
+
+                if type(selection) == list or type(selection) == tuple:
+                    self.set_value(selection, valueName=valueName)
+                else:
+                    self.set_value([selection], valueName=valueName)
+            else:
+                self.set_value([selection[0]], valueName=selection[0].name())
 
 
-            self.set_value(selection, valueName=valueName)
             self.opacity = 1
             self.setStyleSheet(self.activeStyleSheet)
             # Set value on attached objects if any
@@ -193,46 +198,64 @@ class valueButton(QtWidgets.QToolButton):
         else:
             self.opacity = 0.6
 
-            dialog.activatePopup(self, "You dont have any selection")
-            self.set_value(None, valueName=self.originalTitle)
+            dialog.activatePopup(self, "No Selection detected")
+            self.set_value([], valueName=self.originalTitle)
             self.setStyleSheet(self.inactiveStyleSheet)
     def reset_value(self):
-        self.setStyleSheet("")
-    def set_value(self, value, valueName="Assigned"):
+        self.set_value([], valueName=self.originalTitle)
+        self.setStyleSheet(self.inactiveStyleSheet)
+    def set_value(self, value, valueName=None, animate=True):
         height = self.size().height()
         width = self.size().width()
 
-        # Set value in button
         self.value = value
-        if value is not None:
-            self.setStyleSheet(self.activeStyleSheet)
-        # Set text of button
-        self.setText(valueName)
 
+        if len(value) != 0:
+            self.setStyleSheet(self.activeStyleSheet)
+
+        if valueName != None:
+            self.set_text(valueName)
+        else:
+            if value is not None:
+
+                # Convert static to list if asked for
+                if type(value) == list or type(value) == tuple:
+                    pass
+                else:
+                    value = [value]
+
+                try:
+                    valueName = [object.name() for object in value]
+                    valueName = " , ".join(valueName)[:100]
+                    self.set_text(valueName)
+                except:
+                    valueName = [object for object in value]
+                    valueName = " , ".join(valueName)[:100]
+                    self.set_text(valueName)
+            else:
+                self.set_text("No Value")
 
         # Calculate new size
         metrics = QtGui.QFontMetrics(self.font())
-        newWidth = metrics.width(valueName) + 20
+        newWidth = metrics.width(valueName[:self.textCutoff]) + 20
 
-        # Aninmate size
-        animation.propertyAnimation(start=[width,height], end=[newWidth,height], duration=600, object=self, property="maximumSize", mode="OutExpo")
+        # Animate size
+        if animate:
+            animation.animateWidgetSize(self,
+                                     start=(width, height),
+                                     end=(newWidth, height), expanding=True, duration=700, bounce=False)
+        else:
+            self.setMaximumWidth(newWidth)
+            self.setMinimumWidth(newWidth)
 
 
     def set_text(self, input):
-        self.setText(input)
+        self.setText(input[:self.textCutoff])
         if self.originalTitle == None: self.originalTitle = input
-
-        height = self.size().height()
-        # Measure text
-        metrics = QtGui.QFontMetrics(self.font())
-        newWidth = metrics.width(input) + 20
-        animation.propertyAnimation(start=[(newWidth - 20), height], end=[newWidth, height], duration=500, object=self, property="maximumSize", mode="OutExpo")
 
     def get_value(self):
         if self.value != None:
-            if not self.multiple:
-                return self.value[0]
-            else: return self.value
+            return self.value
 
     def enterEvent(self, event):
         animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)

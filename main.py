@@ -28,6 +28,13 @@ def get_value(object):
         value = object.get_value()
     elif "vectorInput" in str(type(object)):  #ValueButton
         value = object.get_values()
+    elif "colorInput" in str(type(object)):  #ValueButton
+        value = object.get_values()
+    elif "pymel_holder" in str(type(object)):  #ValueButton
+        value = object.get_value()
+    elif "combobox_multiple" in str(type(object)):  #ValueButton
+        value = object.get_value()
+        print "COMBo_VALUE:", value
     elif type(object) == QtWidgets.QLabel:  #Label
         value = None
     elif type(object) == QtWidgets.QSpinBox:  #QSpineBox
@@ -41,7 +48,7 @@ def get_value(object):
 
 
     else:
-        print "No supported type found for '{}'".format(type(object))
+        print "GET VALUE: No supported type found for '{}'".format(type(object))
         value = None
 
     return value
@@ -65,7 +72,7 @@ def set_value(object, value):
     elif type(object) == QtWidgets.QCheckBox:
         object.isChecked(value)
     else:
-        print "No supported type found for '{}'".format(type(object))
+        print "SET VALUE: No supported type found for '{}'".format(type(object))
         value = None
 
     return value
@@ -78,6 +85,16 @@ def connect_value_change(object, connection=None):
         object.clicked.connect(connection)
     elif "valueButton" in str(type(object)):  # ValueButton
         object.clicked.connect(connection)
+    elif "colorInput" in str(type(object)) or "vectorInput" in str(type(object)):
+        object.ui.value01.valueChanged.connect(connection)
+        object.ui.value02.valueChanged.connect(connection)
+        object.ui.value03.valueChanged.connect(connection)
+    elif "pymel_holder" in str(type(object)):  # ValueButton
+        object.select_button.clicked.connect(connection)
+    elif "combobox_multiple" in str(type(object)):  # ValueButton
+        object.holder.textChanged.connect(connection)
+        # for c in object.checkboxes:
+        #     c.clicked.connect(connection)
     elif type(object) == QtWidgets.QLabel:
         print "Setting connection on a label is not supported for now"
     elif type(object) == QtWidgets.QSpinBox:
@@ -89,7 +106,7 @@ def connect_value_change(object, connection=None):
     elif type(object) == QtWidgets.QCheckBox:
         object.stateChanged.connect(connection)
     else:
-        print "No supported type found for '{}'".format(type(object))
+        print "CONNECT: No supported type found for '{}'".format(type(object))
 
 def load_svg(iconPath, size=(20,20)):
     svg_renderer = QtSvg.QSvgRenderer(iconPath)
@@ -128,9 +145,11 @@ def autoFieldWidth(inputObject, offset=0, minimum=0, animate=False):
     current_width = inputObject.width()
     current_height = inputObject.height()
 
+
     text = inputObject.text()
     metrics = QtGui.QFontMetrics(inputObject.font())
     width = metrics.width(text) + offset
+
     #Set field
     if width <= minimum: width = minimum
 
@@ -196,26 +215,121 @@ class vectorInput(QtWidgets.QWidget):
     def __init__(self, parent = None, widget=None):
         super(vectorInput, self).__init__()
         self.ui = qtUiLoader("{}vectorWidget.ui".format(relativePath + os.sep + "ui" + os.sep))
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.ui)
-        self.layout.setSpacing(0)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.layout)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.ui)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        self.values = [0,0,0]
+
+    def get_values(self):
+        return self.values
+
+    def set_values(self, values):
+
+        self.ui.value01.setValue(values[0])
+        self.ui.value02.setValue(values[1])
+        self.ui.value03.setValue(values[2])
+
+        self.update_values()
+
+    def setMaximum(self, max_values):
+
+        self.ui.value01.setMaximum(max_values[0])
+        self.ui.value02.setMaximum(max_values[1])
+        self.ui.value03.setMaximum(max_values[2])
+
+    def setMinimum(self, min_values):
+
+        self.ui.value01.setMinimum(min_values[0])
+        self.ui.value02.setMinimum(min_values[1])
+        self.ui.value03.setMinimum(min_values[2])
+
+
+    def update_values(self):
+        self.values = [self.ui.value01.value(), self.ui.value02.value(), self.ui.value03.value()]
+
+    def setDecimal(self, decimalAmount):
+        for o in [self.ui.value01, self.ui.value02, self.ui.value03]:
+            o.setDecimals(decimalAmount)
+            if decimalAmount == 0:
+                o.setSingleStep(1)
+            elif decimalAmount == 1:
+                o.setSingleStep(0.1)
+            elif decimalAmount == 2:
+                o.setSingleStep(0.01)
+
+
+
+class colorInput(QtWidgets.QWidget):
+    def __init__(self, parent = None, widget=None):
+        super(colorInput, self).__init__()
+        self.ui = qtUiLoader("{}colorWidget.ui".format(relativePath + os.sep + "ui" + os.sep))
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.ui)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
 
         # Adjust size
         self.adjustSize()
 
+        # Connect to color-input
+        for button in [self.ui.value01, self.ui.value02, self.ui.value03]:
+            button.valueChanged.connect(self.update_values)
+        self.ui.color_button.clicked.connect(self.show_picker)
+        # Adjust size
+        self.adjustSize()
+
+
     def get_values(self):
-        value01 = self.ui.value01.value()
-        value02 = self.ui.value02.value()
-        value03 = self.ui.value03.value()
+        return self.values
 
-        return (value01, value02, value03)
+    def set_values(self, values):
 
-    def set_values(self, value01, value02, value03):
-        self.ui.value01.setValue(value01)
-        self.ui.value02.setValue(value02)
-        self.ui.value03.setValue(value03)
+        self.ui.value01.setValue(values[0])
+        self.ui.value02.setValue(values[1])
+        self.ui.value03.setValue(values[2])
+
+        self.update_values()
+
+    def setMaximum(self, max_values):
+
+        self.ui.value01.setMaximum(max_values[0])
+        self.ui.value02.setMaximum(max_values[1])
+        self.ui.value03.setMaximum(max_values[2])
+
+    def setMinimum(self, min_values):
+
+        self.ui.value01.setMinimum(min_values[0])
+        self.ui.value02.setMinimum(min_values[1])
+        self.ui.value03.setMinimum(min_values[2])
+
+    def setDecimal(self, decimalAmount):
+        for o in [self.ui.value01, self.ui.value02, self.ui.value03]:
+            o.setDecimals(decimalAmount)
+            if decimalAmount == 0:
+                o.setSingleStep(1)
+            elif decimalAmount == 1:
+                o.setSingleStep(0.1)
+            elif decimalAmount == 2:
+                o.setSingleStep(0.01)
+
+    def show_picker(self):
+        self.color_dialog = QtWidgets.QColorDialog()
+        self.color_dialog.colorSelected.connect(self.trigger_color)
+
+        self.color_dialog.show()
+
+    def trigger_color(self, color):
+        self.set_values(color.getRgb())
+
+    def update_values(self):
+        self.values = [self.ui.value01.value(), self.ui.value02.value(), self.ui.value03.value()]
+
+        # Set color of the button
+        self.ui.color_button.setStyleSheet('background-color: rgb({},{},{});border-radius: 5px;'.format(self.values[0], self.values[01], self.values[2]))
 
 
 def create_spacer(mode="vertical"):

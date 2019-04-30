@@ -20,7 +20,7 @@ def fadeAnimation(start=0, end=1, duration=300, object=None, finishAction=None):
         opasicyAnimation.setDuration(duration)
         opasicyAnimation.setStartValue(start)
         opasicyAnimation.setEndValue(end)
-        opasicyAnimation.start()
+        opasicyAnimation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
         if finishAction != None:
             opasicyAnimation.finished.connect(finishAction)
     else:

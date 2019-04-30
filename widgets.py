@@ -2,9 +2,9 @@ from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
 
 import main
 import animation
-import button
+from button import valueButton, fadeButton
+from icon import svg_icon
 
-reload(animation)
 import icon
 import os
 
@@ -345,7 +345,7 @@ class collapsable_tab():
 
         # Create header
         #self.header = QtWidgets.QPushButton(name)
-        self.header = button.fadeButton(layout)
+        self.header = fadeButton(layout)
         self.header.setText(name)
         self.header.setOpacity(0.5)
         self.header.setIconSize(QtCore.QSize(10, 10))
@@ -427,3 +427,153 @@ class collapsable_tab():
     def set_closed(self):
         '''Open the layout'''
         pass
+
+
+class combobox_multiple(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(combobox_multiple, self).__init__(parent)
+
+        item_list = []
+        self.options = None
+        self.value = []
+        self.checkboxes = []
+
+        self.active_icon_path = relativePath + os.sep + "icons" + os.sep + "checkbox_checked.svg"
+        self.inactive_icon_path = relativePath + os.sep + "icons" + os.sep + "checkbox_unchecked.svg"
+
+
+        self.expand_button = fadeButton(self)
+        self.expand_button.setOpacity(0.8)
+        self.expand_button.setText("Unassigned")
+        self.expand_button.setIconSize(QtCore.QSize(10, 10))
+        icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
+        self.expand_button.clicked.connect(self.toggle_view)
+        #self.expand_button.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+        item_list.append(self.expand_button)
+
+
+        # Create layout
+        self.topLayout = QtWidgets.QVBoxLayout()
+        self.topLayout.setContentsMargins(5, 0, 5, 0)
+        self.topLayout.setSpacing(5)
+
+        # Create main widget
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout()
+        layout.setSpacing(0)
+        layout.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+        layout.setContentsMargins(0,0, 0, 0)
+        widget.setLayout(layout)
+        widget.setMinimumHeight(25)
+        widget.setMaximumHeight(25)
+        self.topLayout.addWidget(widget)
+
+        spacer = main.create_spacer(mode="vertical")
+        layout.addItem(spacer)
+
+        self.holder = QtWidgets.QLineEdit()
+        self.holder.setHidden(True)
+        item_list.append(self.holder)
+
+        # Add items to layout
+        main.add_items_to_layout(layout, item_list)
+
+        # Create holder widget
+        self.holder_frame = QtWidgets.QFrame()
+        self.holder_frame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(1)
+        layout.setContentsMargins(5, 0, 0, 0)
+        self.holder_frame.setLayout(layout)
+        self.topLayout.addWidget(self.holder_frame)
+        self.holder_frame.setHidden(True)
+
+        # Set main layout
+        self.setLayout(self.topLayout)
+
+    def toggle_view(self):
+        widget = self.holder_frame
+        if self.holder_frame.isHidden() is False:
+            icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
+            animation.animateWidgetSize(widget, start=(widget.size().width(), widget.size().height()),
+                              end=(widget.size().width(), 0), expanding=False, duration=500, bounce=True,
+                              finishAction=lambda: widget.setHidden(True))
+        else:
+            widget.setHidden(False)
+            icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_open.svg")
+            animation.animateWidgetSize(widget, start=(widget.size().width(), 0),
+                                     end=(widget.size().width(), widget.sizeHint().height()),
+                                     expanding=True, duration=500, bounce=False)
+
+
+    def add_layout_items(self):
+        # Reset checkboxes
+        self.checkboxes = []
+        # Clear layout
+        main.clearLayout(self.holder_frame.layout())
+        # Create layout
+        for item in self.options:
+            widget = QtWidgets.QWidget()
+            layout = QtWidgets.QHBoxLayout()
+            layout.setSpacing(3)
+            layout.setContentsMargins(0,0, 0, 0)
+            widget.setLayout(layout)
+            widget.setMaximumHeight(30)
+            self.holder_frame.layout().addWidget(widget)
+
+            # Checkbox
+            checkbox = QtWidgets.QCheckBox(str(item))
+            checkbox.setMinimumSize(30, 22)
+            checkbox.setMaximumSize(60, 22)
+            checkbox.item = item
+
+            if item in self.value:
+                checkbox.setChecked(True)
+
+            layout.addWidget(checkbox)
+            checkbox.clicked.connect(self.apply_checkbox_values)
+            self.checkboxes.append(checkbox)
+
+    def apply_checkbox_values(self):
+        # Reset value
+        list = []
+        for cb in self.checkboxes:
+            if cb.isChecked():
+                list.append(cb.item)
+
+        self.holder.setText("Updated")
+
+        self.set_value(list, animate=True)
+
+
+    def remove_item(self):
+        sender = self.sender()
+        sender.widget.setHidden(True)
+
+        # Remove from local value
+        self.value.remove(sender.object)
+
+    def get_value(self):
+        print 'Getting value'
+        print self.value
+        return self.value
+
+    def set_options(self, options):
+        self.options = options
+        self.add_layout_items()
+    def set_value(self, value, animate=False):
+        # Set value in button
+        if type(value) == list or type(value) == tuple:
+            pass
+        else:
+            value = [value]
+
+        if len(value) >= 1:
+            valueName = " , ".join([str(o) for o in value])
+        else:
+            valueName = "Unassigned"
+
+        self.expand_button.setText(valueName)
+        self.value = value
+
+        self.add_layout_items()

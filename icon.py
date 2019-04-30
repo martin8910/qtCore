@@ -24,6 +24,9 @@ def svg_icon(button=None, path=None):
         size = (button.iconSize().width(), button.iconSize().height())
     elif type(button) == QtWidgets.QToolButton:
         size = (button.iconSize().width(), button.iconSize().height())
+    elif type(button) == QtWidgets.QAction:
+        # Unsorted variable for now
+        size = (50, 50)
     elif type(button) == QtWidgets.QLabel:
         size = (button.width(), button.height())
     else:
