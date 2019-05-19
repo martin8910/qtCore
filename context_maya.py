@@ -177,6 +177,7 @@ class pymel_holder(QtWidgets.QWidget):
 
 
     def reset_all_values(self):
+        print "Resetting values"
         self.value = []
         self.select_button.reset_value()
         self.toggle_buttons()
@@ -185,26 +186,25 @@ class pymel_holder(QtWidgets.QWidget):
             self.toggle_view()
 
     def toggle_buttons(self):
-        if len(self.value) >= 2 or len(self.value) == 0:
-            buttons = [self.reset_all_button, self.expand_button]
-        else:
-            buttons = [self.reset_all_button]
-        if len(self.value) == 1:
-            for button in buttons:
-                width = button.sizeHint().width()
-                height = button.sizeHint().height()
-                if button.isHidden():
-                    button.setHidden(False)
-                    animateWidgetSize(button, start=(0, height), end=(width, height), duration=500,attributelist=("maximumSize", "minimumSize"), bounce=False, expanding=True)
-
-            # Hide expand button
-            if self.expand_button.isHidden() is False:
-                width = self.expand_button.sizeHint().width()
-                height = self.expand_button.size().height()
-                animateWidgetSize(self.expand_button, start=(width, height), end=(0, height), duration=500,
-                                  attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False,
-                                  finishAction=lambda: self.expand_button.setHidden(True))
-        elif len(self.value) >= 1:
+        buttons = [self.reset_all_button, self.expand_button]
+        #buttons = [self.expand_button]
+        # if self.multiple_mode == False:
+        #     print "FOR MULTIPLE"
+        #     for button in buttons:
+        #         width = button.sizeHint().width()
+        #         height = button.sizeHint().height()
+        #         if button.isHidden():
+        #             button.setHidden(False)
+        #             animateWidgetSize(button, start=(0, height), end=(width, height), duration=500,attributelist=("maximumSize", "minimumSize"), bounce=False, expanding=True)
+        #
+        #     # Hide expand button
+        #     if self.expand_button.isHidden() is False:
+        #         width = self.expand_button.sizeHint().width()
+        #         height = self.expand_button.size().height()
+        #         animateWidgetSize(self.expand_button, start=(width, height), end=(0, height), duration=500,
+        #                           attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False,
+        #                           finishAction=lambda: self.expand_button.setHidden(True))
+        if len(self.value) >= 1:
             for button in buttons:
                 width = button.sizeHint().width()
                 height = button.sizeHint().height()
@@ -216,11 +216,21 @@ class pymel_holder(QtWidgets.QWidget):
             for button in buttons:
                 width = button.sizeHint().width()
                 height = button.size().height()
-                animateWidgetSize(button, start=(width, height), end=(0, height), duration=500,attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False, finishAction = lambda: [b.setHidden(True) for b in buttons])
+                if button.isHidden() is False:
+                    animateWidgetSize(button, start=(width, height), end=(0, height), duration=500,attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False, finishAction = lambda: [b.setHidden(True) for b in buttons])
     def add_from_button(self):
-        self.value = self.select_button.get_value()
-        self.toggle_buttons()
-        self.add_layout_items()
+        print "Added from the button"
+        button_value = self.select_button.get_value(static=True)
+
+        print "BUTTON-VALUE:", button_value
+        if button_value is not None:
+            if len(button_value) is not 0:
+                self.set_value(button_value)
+
+            self.toggle_buttons()
+            self.add_layout_items()
+        else:
+            self.value = []
 
     def add_layout_items(self):
         # Clear layout
@@ -233,20 +243,27 @@ class pymel_holder(QtWidgets.QWidget):
             layout.setContentsMargins(0,0, 0, 0)
             widget.setLayout(layout)
             widget.setMaximumHeight(30)
+            widget.setStyleSheet("background-color: rgb(250,0,0)")
             self.holder_frame.layout().addWidget(widget)
 
             # Remove button
             remove_button = fadeButton(self)
             svg_icon(button=remove_button, path=relativePath + os.sep + "icons" + os.sep + "crossIcon.svg")
             remove_button.setMaximumWidth(20)
+            remove_button.setMinimumWidth(20)
             remove_button.object = item
             remove_button.widget = widget
             remove_button.clicked.connect(self.remove_item)
             remove_button.setMinimumWidth(20)
             layout.addWidget(remove_button)
 
-            label = QtWidgets.QLabel(item.name())
+            label = QtWidgets.QLabel(item)
             layout.addWidget(label)
+
+        add_more_button = QtWidgets.QPushButton("Add more")
+        self.holder_frame.layout().addWidget(add_more_button)
+        add_more_button.setObjectName("pymel_select_button")
+        #add_more_button.clicked.connect(self.add_more)
 
 
 
@@ -258,17 +275,33 @@ class pymel_holder(QtWidgets.QWidget):
         self.value.remove(sender.object)
 
     def get_value(self):
+        print "context_MAYA: GETTING VALUE", self.value
         return self.value
 
-    def set_value(self, value, animate=True):
+    def set_value(self, in_value, animate=True):
 
-        objects = []
-        # Make sure its pymel objects
+        # Convert item to list if not by default
+        if type(in_value) == list or type(in_value) == tuple:
+            pass
+        else:
+            value = [in_value]
 
+        # Make sure its a string
+        for item in in_value:
+            if "pymel" in type(item).__module__:
+                print "pymel_holder: ERROR, you are trying to feed me a pymel object instead of a string input"
+                break
+
+        # Sanity to see that all of the objects exists
+        # if None not in out_value:
 
         # Set value in button
-        self.select_button.set_value(value, animate=animate)
-        self.value = value
+        self.select_button.set_value(in_value, animate=animate)
+        self.value = in_value
 
         self.toggle_buttons()
         self.add_layout_items()
+        # else:
+        #     print "WARNING: Items in the scene does not exists:"
+        #     for item in in_value:
+        #         print item

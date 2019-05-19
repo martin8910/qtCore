@@ -33,8 +33,8 @@ def get_value(object):
     elif "pymel_holder" in str(type(object)):  #ValueButton
         value = object.get_value()
     elif "combobox_multiple" in str(type(object)):  #ValueButton
+        print "combobox_multiple: Getting value"
         value = object.get_value()
-        print "COMBo_VALUE:", value
     elif type(object) == QtWidgets.QLabel:  #Label
         value = None
     elif type(object) == QtWidgets.QSpinBox:  #QSpineBox
@@ -92,9 +92,10 @@ def connect_value_change(object, connection=None):
     elif "pymel_holder" in str(type(object)):  # ValueButton
         object.select_button.clicked.connect(connection)
     elif "combobox_multiple" in str(type(object)):  # ValueButton
-        object.holder.textChanged.connect(connection)
-        # for c in object.checkboxes:
-        #     c.clicked.connect(connection)
+        object.expand_button.clicked.connect(connection)
+        object.holder.textEdited.connect(connection)
+        for c in object.checkboxes:
+            c.clicked.connect(connection)
     elif type(object) == QtWidgets.QLabel:
         print "Setting connection on a label is not supported for now"
     elif type(object) == QtWidgets.QSpinBox:

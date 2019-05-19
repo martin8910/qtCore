@@ -541,9 +541,10 @@ class combobox_multiple(QtWidgets.QWidget):
             if cb.isChecked():
                 list.append(cb.item)
 
+        self.set_value(list, animate=True)
+
         self.holder.setText("Updated")
 
-        self.set_value(list, animate=True)
 
 
     def remove_item(self):
@@ -554,8 +555,8 @@ class combobox_multiple(QtWidgets.QWidget):
         self.value.remove(sender.object)
 
     def get_value(self):
-        print 'Getting value'
-        print self.value
+        #print 'Getting value'
+        #print self.value
         return self.value
 
     def set_options(self, options):

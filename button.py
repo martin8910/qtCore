@@ -139,6 +139,7 @@ class valueButton(QtWidgets.QToolButton):
 
         # Initialise value
         self.value = None
+        self.static_value = None
         self.multiple = True
         self.originalTitle = None
 
@@ -177,17 +178,15 @@ class valueButton(QtWidgets.QToolButton):
         if len(selection) >= 1:
             if self.multiple:
                 valueName = [object.name() for object in selection]
-                #valueName = ",".join(valueName)[:(int(self.width() * 0.15))]
                 valueName = " , ".join(valueName)
-
-                print "SELECTION:", selection
 
                 if type(selection) == list or type(selection) == tuple:
                     self.set_value(selection, valueName=valueName)
                 else:
-                    self.set_value([selection], valueName=valueName)
+                    pass
+                    #self.set_value([selection], valueName=valueName)
             else:
-                self.set_value([selection[0]], valueName=selection[0].name())
+                self.set_value(selection[0], valueName=selection[0].name())
 
 
             self.opacity = 1
@@ -208,21 +207,34 @@ class valueButton(QtWidgets.QToolButton):
         height = self.size().height()
         width = self.size().width()
 
+        print "INPUT VALUE:", value
         self.value = value
 
+        # Convert to list if not already
+        if type(value) == list or type(value) == tuple:
+            pass
+        else:
+            value = [value]
+
+        # Set stylesheet
         if len(value) != 0:
             self.setStyleSheet(self.activeStyleSheet)
+
+
+        # Set Static values
+        if len(value) is not 0:
+            if type(value[0]) == str or type(value[0]) == unicode:
+                self.static_value = value
+            else:
+                self.static_value = [v.name() for v in value]
+        else:
+            self.static_value = None
+
 
         if valueName != None:
             self.set_text(valueName)
         else:
             if value is not None:
-
-                # Convert static to list if asked for
-                if type(value) == list or type(value) == tuple:
-                    pass
-                else:
-                    value = [value]
 
                 try:
                     valueName = [object.name() for object in value]
@@ -253,9 +265,13 @@ class valueButton(QtWidgets.QToolButton):
         self.setText(input[:self.textCutoff])
         if self.originalTitle == None: self.originalTitle = input
 
-    def get_value(self):
-        if self.value != None:
+    def get_value(self, static=False):
+        if static:
+            return self.static_value
+        else:
             return self.value
+        # if self.value != None:
+        #     return self.value
 
     def enterEvent(self, event):
         animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
