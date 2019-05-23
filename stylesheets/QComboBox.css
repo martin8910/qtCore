@@ -1,0 +1,44 @@
+QPushButton, QToolButton
+{
+	background-color: rgb(0,0,0,50);
+	border-radius: 10px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(150,150,150);
+}
+
+QComboBox {
+	background-color: rgb(0,0,0,50);
+	border-radius: 10px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(150,150,150);
+ }
+
+ 
+ /* Main area when not active */
+ QComboBox:!editable, QComboBox::drop-down:editable {
+	background-color: rgb(0,0,0,50);
+ }
+
+ /* Main area when active */
+ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+ 	background-color: rgb(0,0,0,100);
+ }
+
+
+QComboBox::drop-down {
+ subcontrol-origin: padding;
+ subcontrol-position: top right;
+ width: 15px;
+border-color: rgb(150,150,150);
+ border-left-width: 1px;
+ border-left-color: darkgray;
+ border-left-style: solid; /* just a single line */
+ border-top-right-radius: 1px; /* same radius as the QComboBox */
+ border-bottom-right-radius: 1px;
+}
+
+QComboBox::down-arrow {
+ image: url(/usr/share/icons/crystalsvg/16x16/actions/1downarrow.png);
+}
