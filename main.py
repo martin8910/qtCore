@@ -189,6 +189,11 @@ def select_item_by_text(listWidget, text):
             print "Index probably not found:"
             print "Input text", text
             print "Index found", index
+
+    elif type(listWidget) ==  QtWidgets.QComboBox:
+        index = listWidget.findText(str(text))
+        listWidget.setCurrentIndex(index)
+
     elif type(listWidget) ==  QtWidgets.QListWidget:
         index = listWidget.findText(str(text))
         listWidget.setCurrentIndex(index)

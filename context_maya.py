@@ -1,9 +1,10 @@
 import os
 from maya import OpenMayaUI
+import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin, MayaQDockWidget
 import pymel.core as pm
 
-from external.Qt import QtWidgets, QtCore
+from external.Qt import QtWidgets, QtCore, QtCompat
 import main
 from animation import animateWidgetSize
 from button import valueButton, fadeButton
@@ -23,6 +24,47 @@ except:
     from shiboken2 import wrapInstance
     import shiboken2 as shiboken
 
+
+def Dock(Widget, width=300, show=True, label=None):
+    """Dock `Widget` into Maya
+    Arguments:
+        Widget (QWidget): Class
+        show (bool, optional): Whether to show the resulting dock once created
+    """
+
+    name = Widget.__name__
+    if label is None:
+        label = getattr(Widget, "label", name)
+    try:
+        cmds.deleteUI(name)
+    except RuntimeError:
+        pass
+
+    dockControl = cmds.workspaceControl(
+        name,
+        tabToControl=["AttributeEditor", -1],
+        initialWidth=400,
+        minimumWidth=100,
+        widthProperty="minimum",
+        label=label
+    )
+
+    dockPtr = OpenMayaUI.MQtUtil.findControl(dockControl)
+    dockWidget = QtCompat.wrapInstance(long(dockPtr), QtWidgets.QWidget)
+    dockWidget.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+    child = Widget(dockWidget)
+    dockWidget.layout().addWidget(child)
+
+    if show:
+        cmds.evalDeferred(
+            lambda *args: cmds.workspaceControl(
+                dockControl,
+                edit=True,
+                restore=True
+            )
+        )
+    return child
 
 def get_window():
     '''Return the main maya-window as an instance to parent to'''
@@ -178,7 +220,7 @@ class pymel_holder(QtWidgets.QWidget):
 
     def reset_all_values(self):
         print "Resetting values"
-        self.value = []
+        self.value = None
         self.select_button.reset_value()
         self.toggle_buttons()
 
@@ -204,7 +246,8 @@ class pymel_holder(QtWidgets.QWidget):
         #         animateWidgetSize(self.expand_button, start=(width, height), end=(0, height), duration=500,
         #                           attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False,
         #                           finishAction=lambda: self.expand_button.setHidden(True))
-        if len(self.value) >= 1:
+
+        if self.value is not None:
             for button in buttons:
                 width = button.sizeHint().width()
                 height = button.sizeHint().height()
@@ -243,7 +286,7 @@ class pymel_holder(QtWidgets.QWidget):
             layout.setContentsMargins(0,0, 0, 0)
             widget.setLayout(layout)
             widget.setMaximumHeight(30)
-            widget.setStyleSheet("background-color: rgb(250,0,0)")
+            widget.setStyleSheet("background-color: rgb(0,10,30, 10)")
             self.holder_frame.layout().addWidget(widget)
 
             # Remove button
