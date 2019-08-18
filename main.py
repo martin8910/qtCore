@@ -178,11 +178,19 @@ def selectItemByIndex(listWidget, index):
     firstItem = listWidget.item(index)
     listWidget.setCurrentItem(firstItem)
 
-def select_item_by_text(listWidget, text):
+
+def select_item_by_text(listWidget, text, data_position=None):
     '''Select the index of a QListWidget'''
+    index = -1
     if type(listWidget) == QtWidgets.QListWidget:
         items = [listWidget.item(i).text() for i in range(listWidget.count())]
-        index = items.index(text)  # Get text's index
+        if data_position is None:
+            index = items.index(text)  # Get text's index
+        else:
+            for i in range(listWidget.count()):
+                if listWidget.item(i).data(data_position) == text:
+                    index = i
+                    break
         if index != -1:
             listWidget.setCurrentRow(index)
         else:

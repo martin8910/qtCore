@@ -200,6 +200,7 @@ class valueButton(QtWidgets.QToolButton):
             dialog.activatePopup(self, "No Selection detected")
             self.set_value([], valueName=self.originalTitle)
             self.setStyleSheet(self.inactiveStyleSheet)
+
     def reset_value(self):
         self.set_value([], valueName=self.originalTitle)
         self.setStyleSheet(self.inactiveStyleSheet)

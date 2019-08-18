@@ -17,8 +17,16 @@ relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 # Dialogs
 ###################################################################################################
 
-def progress_window(max=100, title="Operation in progress."):
+def progress_window(max=100, title="Operation in progress.", windowTitle="Please stand by"):
     progress_window = QtWidgets.QProgressDialog(title, "Cancel", 0, max)
+
+    # Set window title
+    progress_window.setWindowTitle(windowTitle)
+
+    # Show window
+    progress_window.show()
+    QtWidgets.QApplication.processEvents()
+
     return progress_window
 
 

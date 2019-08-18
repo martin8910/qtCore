@@ -303,10 +303,10 @@ class pymel_holder(QtWidgets.QWidget):
             label = QtWidgets.QLabel(item)
             layout.addWidget(label)
 
-        add_more_button = QtWidgets.QPushButton("Add more")
-        self.holder_frame.layout().addWidget(add_more_button)
-        add_more_button.setObjectName("pymel_select_button")
-        #add_more_button.clicked.connect(self.add_more)
+        self.add_more_button = QtWidgets.QPushButton("Add more")
+        self.holder_frame.layout().addWidget(self.add_more_button)
+        self.add_more_button.setObjectName("pymel_select_button")
+        self.add_more_button.clicked.connect(self.add_more)
 
 
 
@@ -317,8 +317,21 @@ class pymel_holder(QtWidgets.QWidget):
         # Remove from local value
         self.value.remove(sender.object)
 
+    def add_more(self):
+        '''Add the current selection to the list'''
+
+        selection = pm.ls(sl=True)
+        if len(selection) >= 1:
+            for object in selection:
+                valueName = object.name()
+                self.value.append(valueName)
+        else:
+            print "No selection to add from"
+
+        # Update interface
+        self.set_value(self.value, animate=False)
+
     def get_value(self):
-        print "context_MAYA: GETTING VALUE", self.value
         return self.value
 
     def set_value(self, in_value, animate=True):
