@@ -19,21 +19,24 @@ def qtUiLoader(uifile, widget=None):
                 setattr(widget, member, getattr(ui, member))
         return ui
 
-def get_value(object):
+def get_value(object, static=False):
     '''Get the current value from a input field, numeric slider etc'''
     # Get type
     if type(object) == QtWidgets.QLineEdit:  #QLineEdit
         value = object.text()
+    elif type(object) == QtWidgets.QTextEdit:  #QTextEdit
+        value = object.toPlainText()
     elif "valueButton" in str(type(object)):  #ValueButton
-        value = object.get_value()
+        value = object.get_value(static=static)
     elif "vectorInput" in str(type(object)):  #ValueButton
         value = object.get_values()
     elif "colorInput" in str(type(object)):  #ValueButton
         value = object.get_values()
     elif "pymel_holder" in str(type(object)):  #ValueButton
         value = object.get_value()
+    elif "dict_holder" in str(type(object)):  #ValueButton
+        value = object.get_values()
     elif "combobox_multiple" in str(type(object)):  #ValueButton
-        print "combobox_multiple: Getting value"
         value = object.get_value()
     elif type(object) == QtWidgets.QLabel:  #Label
         value = None
@@ -47,6 +50,7 @@ def get_value(object):
         value = object.currentText()
 
 
+
     else:
         print "GET VALUE: No supported type found for '{}'".format(type(object))
         value = None
@@ -56,7 +60,6 @@ def get_value(object):
 def set_value(object, value):
     '''Get the current value from a input field, numeric slider etc'''
     # Get type
-    print type(value)
     if type(object) == QtWidgets.QLineEdit:
         object.setText(value)
     elif type(object) == QtWidgets.QPushButton:
@@ -64,13 +67,28 @@ def set_value(object, value):
     elif type(object) == QtWidgets.QLabel:
         object.setText(value)
     elif type(object) == QtWidgets.QSpinBox:
-        object.setValue()
+        object.setValue(value)
+    elif type(object) == QtWidgets.QTextEdit:
+        object.setText(value)
     elif type(object) == QtWidgets.QDoubleSpinBox:
-        object.setValue()
+        object.setValue(value)
     elif type(object) == QtWidgets.QComboBox:
         object.setCurrentText(value)
     elif type(object) == QtWidgets.QCheckBox:
-        object.isChecked(value)
+        object.setChecked(value)
+    elif "valueButton" in str(type(object)):  #ValueButton
+        if value is not None:
+            object.set_value(value)
+    elif "vectorInput" in str(type(object)):  #ValueButton
+        object.set_values(value)
+    elif "colorInput" in str(type(object)):  #ValueButton
+        object.set_values(value)
+    elif "pymel_holder" in str(type(object)):  #ValueButton
+        object.set_value(value)
+    elif "dict_holder" in str(type(object)):  #ValueButton
+        object.set_values(value)
+    elif "combobox_multiple" in str(type(object)):  #ValueButton
+        object.set_value(value)
     else:
         print "SET VALUE: No supported type found for '{}'".format(type(object))
         value = None
@@ -89,8 +107,16 @@ def connect_value_change(object, connection=None):
         object.ui.value01.valueChanged.connect(connection)
         object.ui.value02.valueChanged.connect(connection)
         object.ui.value03.valueChanged.connect(connection)
-    elif "pymel_holder" in str(type(object)):  # ValueButton
+    elif "pymel_holder" in str(type(object)):  # Pymel holder item
         object.select_button.clicked.connect(connection)
+    elif "dict_holder" in str(type(object)):  # Dictionary Sheet
+        type_list = [x.type for x in object.rows]
+        for index in range(object.tableWidget.rowCount()):
+            for row, header_type in enumerate(type_list):
+                widget = object.tableWidget.cellWidget(index, row)
+                connect_value_change(widget, connection=connection)
+
+
     elif "combobox_multiple" in str(type(object)):  # ValueButton
         object.expand_button.clicked.connect(connection)
         object.holder.textEdited.connect(connection)
@@ -100,6 +126,8 @@ def connect_value_change(object, connection=None):
         print "Setting connection on a label is not supported for now"
     elif type(object) == QtWidgets.QSpinBox:
         object.valueChanged.connect(connection)
+    elif type(object) == QtWidgets.QTextEdit:
+        object.textChanged.connect(connection)
     elif type(object) == QtWidgets.QDoubleSpinBox:
         object.valueChanged.connect(connection)
     elif type(object) == QtWidgets.QComboBox:
@@ -145,7 +173,6 @@ def autoFieldWidth(inputObject, offset=0, minimum=0, animate=False):
     '''Takes any object that have a "text" attribute and sets its width according to its content'''
     current_width = inputObject.width()
     current_height = inputObject.height()
-
 
     text = inputObject.text()
     metrics = QtGui.QFontMetrics(inputObject.font())
@@ -248,6 +275,12 @@ class vectorInput(QtWidgets.QWidget):
 
         self.update_values()
 
+    def set_titles(self, titles):
+
+        self.ui.label01.setText(titles[0])
+        self.ui.label02.setText(titles[1])
+        self.ui.label03.setText(titles[2])
+
     def setMaximum(self, max_values):
 
         self.ui.value01.setMaximum(max_values[0])
@@ -296,6 +329,8 @@ class colorInput(QtWidgets.QWidget):
         # Adjust size
         self.adjustSize()
 
+        self.update_values()
+
 
     def get_values(self):
         return self.values
@@ -307,6 +342,12 @@ class colorInput(QtWidgets.QWidget):
         self.ui.value03.setValue(values[2])
 
         self.update_values()
+
+    def set_titles(self, titles):
+
+        self.ui.label01.setText(titles[0])
+        self.ui.label02.setText(titles[1])
+        self.ui.label03.setText(titles[2])
 
     def setMaximum(self, max_values):
 

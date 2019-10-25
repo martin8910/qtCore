@@ -1,22 +1,33 @@
 from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
 
 # Load the svg
-def load_svg(iconPath, size=(20,20)):
-    pixmap =  load_svg_pixmap(iconPath, size=size)
+def load_svg(iconPath, size=(20,20), assign_rgb=False):
+    pixmap =  load_svg_pixmap(iconPath, size=size, assign_rgb=assign_rgb)
     icon = QtGui.QIcon(pixmap)
 
     return icon
 
-def load_svg_pixmap(iconPath, size=(20,20)):
+def load_svg_pixmap(iconPath, size=(20,20), assign_rgb=False):
     svg_renderer = QtSvg.QSvgRenderer(iconPath)
     image = QtGui.QImage(size[0], size[1], QtGui.QImage.Format_ARGB32)
     image.fill(0x00000000)
     svg_renderer.render(QtGui.QPainter(image))
-    pixmap = QtGui.QPixmap.fromImage(image)
+
+    if assign_rgb:
+        paint = QtGui.QPainter()
+        paint.begin(image)
+        paint.setCompositionMode(QtGui.QPainter.CompositionMode_SourceIn)
+        paint.fillRect(image.rect(), QtGui.QColor(assign_rgb[0],assign_rgb[1], assign_rgb[2]))
+        paint.end()
+
+        pixmap = QtGui.QPixmap.fromImage(image)
+    else:
+        pixmap = QtGui.QPixmap.fromImage(image)
+
 
     return pixmap
 
-def svg_icon(button=None, path=None):
+def svg_icon(button=None, path=None, assign_rgb=False):
     '''Load a svg icon onto a button respecting its size'''
     if type(button) == QtWidgets.QPushButton:
         size = (button.iconSize().width(), button.iconSize().height())
@@ -37,7 +48,7 @@ def svg_icon(button=None, path=None):
             size = (50,50)
 
     # Create pixmap from path
-    svg_pixmap = load_svg_pixmap(path, size=size)
+    svg_pixmap = load_svg_pixmap(path, size=size, assign_rgb=assign_rgb)
 
     if type(button) == QtWidgets.QPushButton or "fadeButton" in str(type(button)) or "popButton" in str(type(button)):
         button.setIcon(QtGui.QIcon(svg_pixmap))

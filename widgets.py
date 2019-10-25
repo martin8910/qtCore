@@ -1,4 +1,4 @@
-from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
+from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg, Qt
 
 import main
 import animation
@@ -429,6 +429,93 @@ class collapsable_tab():
         pass
 
 
+class editable_header(QtWidgets.QFrame):
+    '''Create a header-object that can be edited by clicking on its header'''
+    def __init__(self, parent=None):
+        super(editable_header, self).__init__(parent)
+
+        # Create communication slot
+        self.emitter = communicate(self)
+
+        self.mode = "view"
+        self.header_text = "Unnamed Session"
+
+        # Add layout
+        self.layout = QtWidgets.QHBoxLayout()
+        self.layout.setContentsMargins(5, 5, 5, 5)
+        self.layout.setSpacing(5)
+        self.setLayout(self.layout)
+
+        # Set stylesheet
+        stylesheet_path = relativePath + "stylesheets" + os.sep + "widgets.css"
+        with open(stylesheet_path, "r") as sheet:
+            self.setStyleSheet(sheet.read())
+
+        # Create title
+        self.label = QtWidgets.QPushButton(self.header_text)
+        self.label.setObjectName("labelButton")
+        self.label.clicked.connect(self.switch_mode)
+        self.layout.addWidget(self.label)
+
+        # Add title edit field
+        self.input = QtWidgets.QLineEdit(self.header_text)
+        self.input.setHidden(True)
+        self.input.textChanged.connect(self.update_text)
+        self.input.returnPressed.connect(self.switch_mode)
+        self.input.textChanged.connect(lambda: self.set_text(self.input.text()))
+        self.layout.addWidget(self.input)
+
+    def set_text(self, input):
+        self.header_text = input
+        self.label.setText(input)
+        self.input.setText(input)
+
+
+    def get_text(self):
+        return self.header_text
+
+
+    def update_text(self):
+        main.autoFieldWidth(self.label, offset=5, animate=False)
+        main.autoFieldWidth(self.input, offset=5, animate=False)
+
+    def enable_font(self, bold=True, size=20):
+        '''Set a font for this header'''
+        # Add Font
+        font = QtGui.QFont()
+        if bold:
+            font.setBold(True)
+        font.setPointSize(size)
+        # Apply font
+        self.label.setFont(font)
+        self.input.setFont(font)
+
+    def switch_mode(self):
+        '''Switch from edit mode to view mode'''
+
+        if self.input.isHidden():
+            source = self.label
+            destination = self.input
+        else:
+            source = self.input
+            destination = self.label
+
+        destination.setMinimumWidth(source.width())
+        destination.setMaximumWidth(16999)
+        #destination.setText(source.text())
+        if self.input.isHidden():
+            destination.setFocus()
+            destination.selectAll()
+        source.setHidden(True)
+        destination.setHidden(False)
+
+        main.autoFieldWidth(destination, offset=1, animate=True)
+
+        # Emit update connection
+        self.emitter.value.emit(1)
+
+
+
 class combobox_multiple(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(combobox_multiple, self).__init__(parent)
@@ -437,6 +524,10 @@ class combobox_multiple(QtWidgets.QWidget):
         self.options = None
         self.value = []
         self.checkboxes = []
+
+        # Create communication slot
+        self.emitter = communicate(self)
+
 
         self.active_icon_path = relativePath + os.sep + "icons" + os.sep + "checkbox_checked.svg"
         self.inactive_icon_path = relativePath + os.sep + "icons" + os.sep + "checkbox_unchecked.svg"
@@ -543,7 +634,10 @@ class combobox_multiple(QtWidgets.QWidget):
 
         self.set_value(list, animate=True)
 
-        self.holder.setText("Updated")
+        # Emit update connection
+        self.emitter.value.emit(1)
+
+
 
 
 
@@ -553,6 +647,9 @@ class combobox_multiple(QtWidgets.QWidget):
 
         # Remove from local value
         self.value.remove(sender.object)
+
+        # Emit update connection
+        self.emitter.value.emit(1)
 
     def get_value(self):
         #print 'Getting value'
@@ -578,3 +675,8 @@ class combobox_multiple(QtWidgets.QWidget):
         self.value = value
 
         self.add_layout_items()
+
+
+class communicate(Qt.QtCore.QObject):
+    '''Create a new signal that other Uis can pick up from'''
+    value = Qt.QtCore.Signal(int)

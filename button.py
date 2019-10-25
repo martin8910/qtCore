@@ -162,9 +162,39 @@ class valueButton(QtWidgets.QToolButton):
 
         # Set style
 
-        self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}"
-        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}"
+        self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}QToolButton::menu-indicator{width:0px;}"
+        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}QToolButton:disabled{background-color: rgb(0, 153, 51, 30);}QToolButton::menu-indicator{width:0px;}"
+
+        # Stylesheet
         self.setStyleSheet(self.inactiveStyleSheet)
+
+        # Add context menu
+        self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        self.add_menu_items()
+
+    def add_menu_items(self):
+        items = []
+        items.append(["Select Objects", self.select_value])
+        items.append(["Reset Values", self.reset_value])
+
+        for item in items:
+            action = QtWidgets.QAction(self)
+            action.setText(item[0])
+            action.triggered.connect(item[1])
+            self.addAction(action)
+
+    def add_more_from_menu(self):
+
+        current_values = self.get_value(static=False)
+        selection = pm.ls(sl=True)
+        if len(selection) >= 1:
+            for object in selection:
+                valueName = object.name()
+                self.value.append(valueName)
+        else:
+            print "No selection to add from"
+
+
     def update_valueItems(self):
         if len(self.value_connector) is not 0:
             for object in self.value_connector:
@@ -208,7 +238,6 @@ class valueButton(QtWidgets.QToolButton):
         height = self.size().height()
         width = self.size().width()
 
-        print "INPUT VALUE:", value
         self.value = value
 
         # Convert to list if not already
@@ -274,6 +303,9 @@ class valueButton(QtWidgets.QToolButton):
         # if self.value != None:
         #     return self.value
 
+    def select_value(self):
+        pm.select(self.value)
+
     def enterEvent(self, event):
         animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
         # self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -318,6 +350,7 @@ class pathButton(QtWidgets.QPushButton):
         self.value = None
         self.pathField = None
         self.mode = "Directory"
+        # self.mode = ExistingFiles, DirectoryOnly, Directory, ExistingFile, SaveFile, AnyFile
         self.filter = None
         #self.filter = "Maya file(*.mb)"
 
