@@ -536,8 +536,12 @@ class dict_holder(QtWidgets.QWidget):
                         widget.setText("Undefined")
                     elif type == "float":
                         widget =  QtWidgets.QDoubleSpinBox()
+                        widget.setMaximum(99999)
+                        widget.setMinimum(-99999)
                     elif type == "int":
                         widget = QtWidgets.QSpinBox()
+                        widget.setMaximum(99999)
+                        widget.setMinimum(-99999)
                     elif type == "selectSingle":
                         widget = QtWidgets.QComboBox()
                         # Add options
@@ -596,3 +600,4 @@ class dict_holder(QtWidgets.QWidget):
 class communicate(Qt.QtCore.QObject):
     '''Create a new signal that other Uis can pick up from'''
     value = Qt.QtCore.Signal(int)
+

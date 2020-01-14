@@ -401,3 +401,22 @@ class QHLine(QtWidgets.QFrame):
         super(QHLine, self).__init__()
         self.setFrameShape(QtWidgets.QFrame.HLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+
+def read_stylesheet(widget, filepath):
+    '''
+    Create a stylesheet file from
+    :param widget: Widget to apply style to
+    :param filepath: Filepath to the stylesheet
+    :type widget: QWidget
+    :type filepath: path
+    :return: None
+    '''
+    # Apply stylesheet to layout
+    if os.path.exists(filepath):
+        with open(filepath, "r") as sheet:
+           widget.setStyleSheet(sheet.read())
+    else:
+        print "ERROR The CSS path dont exists:"
+        print  filepath
+
