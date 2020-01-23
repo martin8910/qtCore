@@ -150,8 +150,8 @@ class valueButton(QtWidgets.QToolButton):
         # Create opacity effect
         self.opacity = 0.8
         self.endOpacity = 1
-        self.inAnimDuration = 300
-        self.outAnimDuration = 800
+        self.inAnimDuration = 100
+        self.outAnimDuration = 400
         self.opacityEffect = QtWidgets.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacityEffect)
         self.setAutoFillBackground(True)
@@ -234,7 +234,7 @@ class valueButton(QtWidgets.QToolButton):
     def reset_value(self):
         self.set_value([], valueName=self.originalTitle)
         self.setStyleSheet(self.inactiveStyleSheet)
-    def set_value(self, value, valueName=None, animate=True):
+    def set_value(self, value, valueName=None, animate=False):
         height = self.size().height()
         width = self.size().width()
 

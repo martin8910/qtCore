@@ -212,13 +212,13 @@ class pymel_holder(QtWidgets.QWidget):
         widget = self.holder_frame
         if self.holder_frame.isHidden() is False:
             animateWidgetSize(widget, start=(widget.size().width(), widget.size().height()),
-                              end=(widget.size().width(), 0), expanding=False, duration=1000, bounce=True,
+                              end=(widget.size().width(), 0), expanding=False, duration=50, bounce=True,
                               finishAction=lambda: widget.setHidden(True))
         else:
             widget.setHidden(False)
             animateWidgetSize(widget, start=(widget.size().width(), 0),
                                      end=(widget.size().width(), widget.sizeHint().height()),
-                                     expanding=True, duration=1000, bounce=False)
+                                     expanding=True, duration=50, bounce=False)
 
 
     def reset_all_values(self):
@@ -304,10 +304,13 @@ class pymel_holder(QtWidgets.QWidget):
         sender.widget.setHidden(True)
 
         # Remove from local value
+        print "VALUE:", sender.object
         self.value.remove(sender.object)
 
         # Emit update connection
         self.emitter.value.emit(1)
+
+        print "This will remove a item"
 
     def add_more(self):
         '''Add the current selection to the list'''
@@ -329,7 +332,7 @@ class pymel_holder(QtWidgets.QWidget):
     def get_value(self):
         return self.value
 
-    def set_value(self, in_value, animate=True):
+    def set_value(self, in_value, animate=False):
 
         # Convert item to list if not by default
         if type(in_value) == list or type(in_value) == tuple:
@@ -399,8 +402,8 @@ class dict_holder(QtWidgets.QWidget):
         layout.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
         layout.setContentsMargins(0,0, 0, 0)
         widget.setLayout(layout)
-        widget.setMinimumHeight(25)
-        widget.setMaximumHeight(25)
+        widget.setMinimumHeight(20)
+        widget.setMaximumHeight(20)
         self.topLayout.addWidget(widget)
 
         spacer = main.create_spacer(mode="vertical")
@@ -453,12 +456,14 @@ class dict_holder(QtWidgets.QWidget):
     def remove_item(self):
         '''Remove a item from the list'''
 
-        selected = self.tableWidget.currentRow()
-        #print self.tableWidget.selectedRanges().top()
-        #print self.tableWidget.selectedRanges().bottom()
-        #print "SELECTED:", selected
+        selected_index = self.tableWidget.currentRow()
+        #print "VALUE BEFORE:", self.value, len(self.value)
+        #print selected_index
 
-        self.tableWidget.removeRow(selected)
+        # Remove value
+        del self.value[selected_index]
+
+        self.tableWidget.removeRow(selected_index)
 
     def get_values(self):
         data = []
