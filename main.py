@@ -420,3 +420,27 @@ def read_stylesheet(widget, filepath):
         print "ERROR The CSS path dont exists:"
         print  filepath
 
+def label_checkbox(object, on_title="On", off_title="Off"):
+    '''Name a checkbox by a value'''
+    if object.isChecked():
+        object.setText(on_title)
+    else:
+        object.setText(off_title)
+
+
+# Resize the text-area to fit
+def resize_textEdit_to_content(inputObject, max=500):
+    '''Resize a text-edit widget to its content'''
+
+    fontMetrics = QtGui.QFontMetrics(inputObject.font())  # a QFontMetrics based on our font
+    textSize = fontMetrics.size(0, inputObject.toPlainText())
+    textHeight = textSize.height() + 12  # constant may need to be tweaked
+
+    if textHeight <= max:
+        inputObject.setMaximumHeight(textHeight)
+        inputObject.setMinimumHeight(textHeight)
+    else:
+        inputObject.setMaximumHeight(max)
+        inputObject.setMinimumHeight(max)
+    #inputObject.resize(textWidth, textHeight)  # good if you want this to be standalone
+
