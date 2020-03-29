@@ -539,7 +539,6 @@ class combobox_multiple(QtWidgets.QWidget):
         self.expand_button.setIconSize(QtCore.QSize(10, 10))
         icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
         self.expand_button.clicked.connect(self.toggle_view)
-        #self.expand_button.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         item_list.append(self.expand_button)
 
 
@@ -584,17 +583,18 @@ class combobox_multiple(QtWidgets.QWidget):
 
     def toggle_view(self):
         widget = self.holder_frame
+        #self.emitter.value.emit(1)
         if self.holder_frame.isHidden() is False:
             icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
             animation.animateWidgetSize(widget, start=(widget.size().width(), widget.size().height()),
                               end=(widget.size().width(), 0), expanding=False, duration=500, bounce=True,
-                              finishAction=lambda: widget.setHidden(True))
+                              finishAction=[lambda: widget.setHidden(True), lambda: self.emitter.value.emit(1)])
         else:
             widget.setHidden(False)
             icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_open.svg")
             animation.animateWidgetSize(widget, start=(widget.size().width(), 0),
                                      end=(widget.size().width(), widget.sizeHint().height()),
-                                     expanding=True, duration=500, bounce=False)
+                                     expanding=True, duration=500, bounce=False, finishAction=lambda: self.emitter.value.emit(1))
 
 
     def add_layout_items(self):

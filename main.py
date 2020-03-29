@@ -115,8 +115,6 @@ def connect_value_change(object, connection=None):
             for row, header_type in enumerate(type_list):
                 widget = object.tableWidget.cellWidget(index, row)
                 connect_value_change(widget, connection=connection)
-
-
     elif "combobox_multiple" in str(type(object)):  # ValueButton
         object.expand_button.clicked.connect(connection)
         object.holder.textEdited.connect(connection)
@@ -136,6 +134,33 @@ def connect_value_change(object, connection=None):
         object.stateChanged.connect(connection)
     else:
         print "CONNECT: No supported type found for '{}'".format(type(object))
+
+
+
+def object_from_type(object):
+    '''Return an object that accepts its input type'''
+    # Get type
+    # Check if object is more then 1
+
+    #if type(object)
+    object = QtWidgets.QLineEdit()
+    object = QtWidgets.QPushButton()
+    object = QtWidgets.QLabel()
+    object = QtWidgets.QSpinBox()
+    object = QtWidgets.QTextEdit()
+    object = QtWidgets.QDoubleSpinBox()
+    object = QtWidgets.QComboBox()
+    object = QtWidgets.QCheckBox()
+    #"valueButton"
+    #"vectorInput"
+    #"colorInput"
+    #"pymel_holder"
+    #"dict_holder"
+    #"combobox_multiple"
+    #else:
+    #    print "SET VALUE: No supported type found for '{}'".format(type(object))
+    #    value = None
+    #print
 
 def load_svg(iconPath, size=(20,20)):
     svg_renderer = QtSvg.QSvgRenderer(iconPath)

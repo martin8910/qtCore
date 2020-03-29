@@ -151,6 +151,8 @@ class pymel_holder(QtWidgets.QWidget):
         item_list.append(self.select_button)
         self.select_button.setObjectName("pymel_select_button")
         self.select_button.clicked.connect(self.add_from_button)
+        self.select_button.emitter.value.connect(self.add_from_button)
+
 
         self.expand_button = fadeButton(self)
         svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "threeLines.svg")
@@ -275,7 +277,6 @@ class pymel_holder(QtWidgets.QWidget):
             layout.setContentsMargins(0,0, 0, 0)
             widget.setLayout(layout)
             widget.setMaximumHeight(20)
-            widget.setStyleSheet("background-color: rgb(0,10,30, 10)")
             self.holder_frame.layout().addWidget(widget)
 
             # Remove button
@@ -309,8 +310,6 @@ class pymel_holder(QtWidgets.QWidget):
 
         # Emit update connection
         self.emitter.value.emit(1)
-
-        print "This will remove a item"
 
     def add_more(self):
         '''Add the current selection to the list'''
@@ -406,6 +405,8 @@ class dict_holder(QtWidgets.QWidget):
         widget.setMaximumHeight(20)
         self.topLayout.addWidget(widget)
 
+
+
         spacer = main.create_spacer(mode="vertical")
         layout.addItem(spacer)
 
@@ -425,7 +426,7 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget = QtWidgets.QTableWidget()
         self.holder_frame.layout().addWidget(self.tableWidget)
         self.tableWidget.itemSelectionChanged.connect(self.update_buttons)
-        self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+        self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.tableWidget.setShowGrid(False)
         self.tableWidget.verticalHeader().setDefaultSectionSize(40)
         self.tableWidget.setCornerWidget(None)
@@ -504,6 +505,9 @@ class dict_holder(QtWidgets.QWidget):
         # Emit signal so other uis connected to this will get updated
         self.emitter.value.emit(1)
 
+    def update_layout(self):
+        self.tableWidget.resizeRowsToContents()
+
     def add_layout_items(self):
 
         if self.rows is None:
@@ -553,7 +557,10 @@ class dict_holder(QtWidgets.QWidget):
                         widget.addItems([str(option) for option in options_list[row]])
                     elif type == "selectMultiple":
                         widget = combobox_multiple()
+                        print widget.emitter.value
+                        widget.emitter.value.connect(self.update_layout)
                         widget.set_options(options_list[row])
+                        widget
                     elif type == "bool":
                         widget = QtWidgets.QCheckBox()
                         print defaultValue_list[row]

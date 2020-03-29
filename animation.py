@@ -252,7 +252,11 @@ def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False,
 
         # Connect Finish Action
         if finishAction != None:
-            animation.finished.connect(finishAction)
+            if type(finishAction) is list or type(finishAction) is tuple:
+                for action in finishAction:
+                    animation.finished.connect(action)
+            else:
+                animation.finished.connect(finishAction)
 
         # Start animation and delete when finished
         animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)

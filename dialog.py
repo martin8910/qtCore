@@ -30,6 +30,15 @@ def progress_window(max=100, title="Operation in progress.", windowTitle="Please
     return progress_window
 
 
+def inputDialog(instance, header="This is the header", text="Default Text here", input=""):
+    output, ok = QtWidgets.QInputDialog.getText(instance, header, text,text=input)
+
+    if ok:
+        return output
+    else:
+        return None
+
+
 def yesCancelDialog(title="Remove action", message="Are you sure you wanna remove this action?"):
     # Create dialog
     saveCurrentDialog = QtWidgets.QMessageBox()

@@ -30,11 +30,24 @@ def get_all_items(tree_widget):
 
 
 
-def remove_children_from_treeWidgetItem(treeWidgetItem):
+def remove_children_from_treeWidgetItem(item):
     '''Remove all the children from a QTreeWidgetItem'''
 
-    for item in reversed(range(treeWidgetItem.childCount())):
-        treeWidgetItem.removeChild(treeWidgetItem.child(item))
+    #for item in reversed(range(treeWidgetItem.childCount())):
+    #    treeWidgetItem.removeChild(treeWidgetItem.child(item))
+    tree_widget = item.treeWidget()
+
+    parent = item.parent()
+    # Get its parent
+
+    if tree_widget.indexOfTopLevelItem(item) > -1:
+        # Top-level item, find index and remove
+        index = tree_widget.indexOfTopLevelItem(item)
+        tree_widget.takeTopLevelItem(index)
+    else:
+        #Take item from current index
+        index = parent.indexOfChild(item)
+        parent.takeChild(index)
 
 
 def traverse_tree(treeWidgetItem):

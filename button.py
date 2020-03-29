@@ -1,7 +1,7 @@
 __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
-from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
+from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg, Qt
 import animation
 import dialog
 import icon as qt_icon
@@ -139,12 +139,18 @@ class valueButton(QtWidgets.QToolButton):
 
         # Initialise value
         self.value = None
+        self.missing_value = []
         self.static_value = None
         self.multiple = True
         self.originalTitle = None
 
+        # Create communication slot for updates
+        self.emitter = communicate(self)
+
         # Store other objects that should update when this button is updated
         self.value_connector = []
+
+        self.menu_items = []
 
 
         # Create opacity effect
@@ -163,6 +169,7 @@ class valueButton(QtWidgets.QToolButton):
         # Set style
 
         self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}QToolButton::menu-indicator{width:0px;}"
+        self.errorStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(234,100,61,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}QToolButton::menu-indicator{width:0px;}"
         self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}QToolButton:disabled{background-color: rgb(0, 153, 51, 30);}QToolButton::menu-indicator{width:0px;}"
 
         # Stylesheet
@@ -175,12 +182,21 @@ class valueButton(QtWidgets.QToolButton):
     def add_menu_items(self):
         items = []
         items.append(["Select Objects", self.select_value])
+        items.append(["Add selected", self.add_more_from_menu])
         items.append(["Reset Values", self.reset_value])
+        if self.missing_value:
+            items.append(["Remove missing", self.remove_missing_values])
 
+
+        if len(self.menu_items) != 0:
+            for action in self.menu_items:
+                self.removeAction(action)
+        self.menu_items = []
         for item in items:
             action = QtWidgets.QAction(self)
             action.setText(item[0])
             action.triggered.connect(item[1])
+            self.menu_items.append(action)
             self.addAction(action)
 
     def add_more_from_menu(self):
@@ -190,10 +206,29 @@ class valueButton(QtWidgets.QToolButton):
         if len(selection) >= 1:
             for object in selection:
                 valueName = object.name()
-                self.value.append(valueName)
+                if valueName not in current_values:
+                    if type(current_values[0]) == str or type(current_values[0]) == unicode:
+                        self.value.append(object.name())
+                    else:
+                        self.value.append(object)
+                else:
+                    print "WARNING: '{}' already exist as a value".format(valueName)
+            self.set_header()
+            self.emitter.value.emit(1)
         else:
-            print "No selection to add from"
+            print "WARNING: No selection to add from!"
 
+
+    def remove_missing_values(self):
+
+        # Get current value and
+        current_value = self.get_value(static=True)
+        print "CURRENT:", current_value
+        current_value
+        new_values = [x for x in current_value if x not in self.missing_value]
+        print "NEW:", new_values
+        self.set_value(new_values)
+        self.emitter.value.emit(1)
 
     def update_valueItems(self):
         if len(self.value_connector) is not 0:
@@ -261,19 +296,29 @@ class valueButton(QtWidgets.QToolButton):
             self.static_value = None
 
 
+        self.set_header(valueName=None, animate=animate)
+
+
+    def set_header(self, valueName=None, animate=False):
+        value = self.value
         if valueName != None:
             self.set_text(valueName)
         else:
             if value is not None:
-
                 try:
                     valueName = [object.name() for object in value]
-                    valueName = " , ".join(valueName)[:100]
-                    self.set_text(valueName)
                 except:
                     valueName = [object for object in value]
-                    valueName = " , ".join(valueName)[:100]
-                    self.set_text(valueName)
+                valueName = ",".join(valueName)[:30]
+                self.set_text(valueName)
+
+                # Check missing geo
+                existing_geo = [x for x in value if pm.objExists(x)]
+                self.missing_value = list(set(value) - set(existing_geo))
+                if self.missing_value:
+                    print "The following item dont exist in the scene", self.missing_value
+                    self.setStyleSheet(self.errorStyleSheet)
+                    self.add_menu_items()
             else:
                 self.set_text("No Value")
 
@@ -289,7 +334,6 @@ class valueButton(QtWidgets.QToolButton):
         else:
             self.setMaximumWidth(newWidth)
             self.setMinimumWidth(newWidth)
-
 
     def set_text(self, input):
         self.setText(input[:self.textCutoff])
@@ -350,6 +394,7 @@ class pathButton(QtWidgets.QPushButton):
         self.value = None
         self.pathField = None
         self.mode = "Directory"
+        self.message = "Open something for us. [Specify this with self.message]"
         # self.mode = ExistingFiles, DirectoryOnly, Directory, ExistingFile, SaveFile, AnyFile
         self.filter = None
         #self.filter = "Maya file(*.mb)"
@@ -383,3 +428,8 @@ class pathButton(QtWidgets.QPushButton):
         file = dialog.picker_dialog(mode=self.mode, filter=self.filter)
         if self.pathField != None:
             self.pathField.setText(file[0])
+
+
+class communicate(Qt.QtCore.QObject):
+    '''Create a new signal that other Uis can pick up from'''
+    value = Qt.QtCore.Signal(int)
