@@ -28,15 +28,25 @@ def get_value(object, static=False):
         value = object.toPlainText()
     elif "valueButton" in str(type(object)):  #ValueButton
         value = object.get_value(static=static)
+        # Return the first instance if multiple is false
+        if object.multiple is False:
+            try: value = value[0]
+            except: value = value
+            #if type(value) is not None:
+            #    value = value[0]
+            #else:
+            #    value = value
     elif "vectorInput" in str(type(object)):  #ValueButton
         value = object.get_values()
     elif "colorInput" in str(type(object)):  #ValueButton
         value = object.get_values()
-    elif "pymel_holder" in str(type(object)):  #ValueButton
+    elif "pymel_holder" in str(type(object)):  #Pymel holder
         value = object.get_value()
-    elif "dict_holder" in str(type(object)):  #ValueButton
+    elif "dict_holder" in str(type(object)):  #Dictionary Holder
         value = object.get_values()
     elif "combobox_multiple" in str(type(object)):  #ValueButton
+        value = object.get_value()
+    elif "attribute_holder" in str(type(object)):  #Combobox Multiple
         value = object.get_value()
     elif type(object) == QtWidgets.QLabel:  #Label
         value = None
@@ -48,8 +58,6 @@ def get_value(object, static=False):
         value = object.isChecked()
     elif type(object) == QtWidgets.QComboBox:  #QComboBox
         value = object.currentText()
-
-
 
     else:
         print "GET VALUE: No supported type found for '{}'".format(type(object))
@@ -89,6 +97,8 @@ def set_value(object, value):
         object.set_values(value)
     elif "combobox_multiple" in str(type(object)):  #ValueButton
         object.set_value(value)
+    elif "attribute_holder" in str(type(object)):  #ValueButton
+        object.set_value(object=value["object"], attributes=value["attributes"])
     else:
         print "SET VALUE: No supported type found for '{}'".format(type(object))
         value = None
@@ -108,6 +118,8 @@ def connect_value_change(object, connection=None):
         object.ui.value02.valueChanged.connect(connection)
         object.ui.value03.valueChanged.connect(connection)
     elif "pymel_holder" in str(type(object)):  # Pymel holder item
+        object.select_button.clicked.connect(connection)
+    elif "attribute_holder" in str(type(object)):  # Pymel holder item
         object.select_button.clicked.connect(connection)
     elif "dict_holder" in str(type(object)):  # Dictionary Sheet
         type_list = [x.type for x in object.rows]
@@ -140,17 +152,33 @@ def connect_value_change(object, connection=None):
 def object_from_type(object):
     '''Return an object that accepts its input type'''
     # Get type
-    # Check if object is more then 1
-
-    #if type(object)
-    object = QtWidgets.QLineEdit()
-    object = QtWidgets.QPushButton()
-    object = QtWidgets.QLabel()
-    object = QtWidgets.QSpinBox()
-    object = QtWidgets.QTextEdit()
-    object = QtWidgets.QDoubleSpinBox()
-    object = QtWidgets.QComboBox()
-    object = QtWidgets.QCheckBox()
+    #print "TYPE:", type(object)
+    #print "VALUE:", object
+    if type(object) == str or type(object) == unicode:
+        widget = QtWidgets.QLineEdit()
+        widget.setText(object)
+    elif type(object) == None:
+        widget = QtWidgets.QLineEdit()
+    elif type(object) == bool:
+        widget = QtWidgets.QCheckBox()
+        if object is True:
+            widget.setChecked(True)
+    elif type(object) == list:
+        widget = QtWidgets.QLineEdit()
+    elif type(object) == list:
+        widget = QtWidgets.QLineEdit()
+    elif type(object) == None:
+        widget = QtWidgets.QPushButton("None")
+    elif type(object) == dict:
+        widget = QtWidgets.QPushButton("Dictionary")
+    #object = QtWidgets.QLineEdit()
+    #object = QtWidgets.QPushButton()
+    #object = QtWidgets.QLabel()
+    #object = QtWidgets.QSpinBox()
+    #object = QtWidgets.QTextEdit()
+    #object = QtWidgets.QDoubleSpinBox()
+    #object = QtWidgets.QComboBox()
+    #bject = QtWidgets.QCheckBox()
     #"valueButton"
     #"vectorInput"
     #"colorInput"
@@ -162,15 +190,32 @@ def object_from_type(object):
     #    value = None
     #print
 
-def load_svg(iconPath, size=(20,20)):
-    svg_renderer = QtSvg.QSvgRenderer(iconPath)
-    image = QtGui.QImage(size[0], size[1], QtGui.QImage.Format_ARGB32)
-    image.fill(0x00000000)
-    svg_renderer.render(QtGui.QPainter(image))
-    pixmap = QtGui.QPixmap.fromImage(image)
-    icon = QtGui.QIcon(pixmap)
+    # '''Connect the changecommand for a object based on its type'''
+    # if type(object) == QtWidgets.QLineEdit:
+    #     object.textChanged.connect(connection)
+    # elif type(object) == QtWidgets.QPushButton:
+    #     object.clicked.connect(connection)
+    # elif type(object) == QtWidgets.QLabel:
+    #     print "Setting connection on a label is not supported for now"
+    # elif type(object) == QtWidgets.QSpinBox:
+    # elif type(object) == QtWidgets.QTextEdit:
+    # elif type(object) == QtWidgets.QDoubleSpinBox:
+    # elif type(object) == QtWidgets.QComboBox:
+    # elif type(object) == QtWidgets.QCheckBox:
+    # else:
+    #     print "CONNECT: No supported type found for '{}'".format(type(object))
 
-    return icon
+    return widget
+
+# def load_svg(iconPath, size=(20,20)):
+#     svg_renderer = QtSvg.QSvgRenderer(iconPath)
+#     image = QtGui.QImage(size[0], size[1], QtGui.QImage.Format_ARGB32)
+#     image.fill(0x00000000)
+#     svg_renderer.render(QtGui.QPainter(image))
+#     pixmap = QtGui.QPixmap.fromImage(image)
+#     icon = QtGui.QIcon(pixmap)
+#
+#     return icon
 
 
 def get_index_in_layout(item):

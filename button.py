@@ -167,10 +167,9 @@ class valueButton(QtWidgets.QToolButton):
         self.textCutoff = 30
 
         # Set style
-
-        self.inactiveStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}QToolButton::menu-indicator{width:0px;}"
-        self.errorStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(234,100,61,20);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\nborder-color: rgb(250,250,250);\nborder-width: 1px;\n}QToolButton::menu-indicator{width:0px;}"
-        self.activeStyleSheet = "QToolButton\n{\npadding: 5px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\nborder-style: solid;\nborder-color: rgb(250,250,250, 50);\nborder-width: 1px;\n\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\nborder-style: solid;\nborder-color: rgb(250,250,250, 240);\nborder-width: 1px;\n}QToolButton:disabled{background-color: rgb(0, 153, 51, 30);}QToolButton::menu-indicator{width:0px;}"
+        self.inactiveStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\n}QToolButton::menu-indicator{width:0px;}"
+        self.errorStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(234,100,61,20);\ncolor: rgb(250,250,250,200);\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\n}QToolButton::menu-indicator{width:0px;}"
+        self.activeStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\n}QToolButton:disabled{background-color: rgb(0, 153, 51, 30);}QToolButton::menu-indicator{width:0px;}"
 
         # Stylesheet
         self.setStyleSheet(self.inactiveStyleSheet)
@@ -223,10 +222,7 @@ class valueButton(QtWidgets.QToolButton):
 
         # Get current value and
         current_value = self.get_value(static=True)
-        print "CURRENT:", current_value
-        current_value
         new_values = [x for x in current_value if x not in self.missing_value]
-        print "NEW:", new_values
         self.set_value(new_values)
         self.emitter.value.emit(1)
 
@@ -269,9 +265,8 @@ class valueButton(QtWidgets.QToolButton):
     def reset_value(self):
         self.set_value([], valueName=self.originalTitle)
         self.setStyleSheet(self.inactiveStyleSheet)
+        self.emitter.value.emit(1)
     def set_value(self, value, valueName=None, animate=False):
-        height = self.size().height()
-        width = self.size().width()
 
         self.value = value
 
@@ -280,11 +275,12 @@ class valueButton(QtWidgets.QToolButton):
             pass
         else:
             value = [value]
+            # New line to handle offset
+            self.value = value
 
         # Set stylesheet
         if len(value) != 0:
             self.setStyleSheet(self.activeStyleSheet)
-
 
         # Set Static values
         if len(value) is not 0:
@@ -300,40 +296,70 @@ class valueButton(QtWidgets.QToolButton):
 
 
     def set_header(self, valueName=None, animate=False):
+        height = self.size().height()
+        width = self.size().width()
+
         value = self.value
         if valueName != None:
             self.set_text(valueName)
         else:
+            # If not None
             if value is not None:
-                try:
-                    valueName = [object.name() for object in value]
-                except:
-                    valueName = [object for object in value]
-                valueName = ",".join(valueName)[:30]
+                # If List
+                if type(value) == list or type(value) == tuple:
+                    # If length is not 0
+                    if len(value) != 0:
+                        # If first list-item is unicode
+                        if type(value[0]) == str or type(value[0]) == unicode:
+                            valueName = [object for object in value]
+                        # If first list-item is object
+                        else:
+                            valueName = [object.name() for object in value]
+
+                        valueName = ",".join(valueName)[:30]
+                        static_value = valueName
+                    else:
+                        valueName = "Nothing selected..."
+                # Not a list
+                else:
+                    # If unicode
+                    if type(value) == str or type(value) == unicode:
+                        valueName = value
+                    # If Pymel
+                    else:
+                        valueName = value.name()
                 self.set_text(valueName)
 
                 # Check missing geo
-                existing_geo = [x for x in value if pm.objExists(x)]
-                self.missing_value = list(set(value) - set(existing_geo))
-                if self.missing_value:
-                    print "The following item dont exist in the scene", self.missing_value
-                    self.setStyleSheet(self.errorStyleSheet)
-                    self.add_menu_items()
+
+                if self.value is not None:
+                    if len(self.value) != 0:
+                        existing_geo = [x for x in self.static_value if pm.objExists(x)]
+                        self.missing_value = list(set(self.static_value) - set(existing_geo))
+                        if self.missing_value:
+                            print "The following item dont exist in the scene", self.missing_value
+                            self.setStyleSheet(self.errorStyleSheet)
+                            self.add_menu_items()
             else:
                 self.set_text("No Value")
 
         # Calculate new size
+
+        # Get max size from parent
         metrics = QtGui.QFontMetrics(self.font())
         newWidth = metrics.width(valueName[:self.textCutoff]) + 20
 
         # Animate size
         if animate:
-            animation.animateWidgetSize(self,
-                                     start=(width, height),
-                                     end=(newWidth, height), expanding=True, duration=700, bounce=False)
+            animation.animateWidgetSize(self,start=(width, height),end=(newWidth, height), expanding=True, duration=700, bounce=False)
         else:
-            self.setMaximumWidth(newWidth)
-            self.setMinimumWidth(newWidth)
+            #self.setMaximumWidth(newWidth)
+            #self.setMinimumWidth(newWidth)
+            #self.minimumSizeHint(newWidth, self.sizeHint().height())
+
+            self.setMaximumSize(QtCore.QSize(newWidth, self.sizeHint().height()))
+            #self.adjustSize()
+            #self.resize(self.sizeHint())
 
     def set_text(self, input):
         self.setText(input[:self.textCutoff])
@@ -344,19 +370,17 @@ class valueButton(QtWidgets.QToolButton):
             return self.static_value
         else:
             return self.value
-        # if self.value != None:
-        #     return self.value
 
     def select_value(self):
         pm.select(self.value)
 
-    def enterEvent(self, event):
-        animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
-        # self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-
-    def leaveEvent(self, event):
-        animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,object=self.opacityEffect)
-        # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+    # def enterEvent(self, event):
+    #     animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
+    #     # self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+    #
+    # def leaveEvent(self, event):
+    #     animation.fadeAnimation(start="current", end=self.opacity, duration=self.outAnimDuration,object=self.opacityEffect)
+    #     # self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
 
 class dropButton(valueButton):
     '''Create a button that can store values for us'''

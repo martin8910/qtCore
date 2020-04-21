@@ -56,6 +56,8 @@ def svg_icon(button=None, path=None, assign_rgb=False):
         button.setPixmap(svg_pixmap)
     elif type(button) == QtWidgets.QLabel:
         button.setIcon(QtGui.QIcon(svg_pixmap))
+    elif type(button) == QtWidgets.QToolButton:
+        button.setIcon(QtGui.QIcon(svg_pixmap))
     elif type(button) == QtWidgets.QAction:
         button.setIcon(QtGui.QIcon(svg_pixmap))
     else:

@@ -638,9 +638,6 @@ class combobox_multiple(QtWidgets.QWidget):
         self.emitter.value.emit(1)
 
 
-
-
-
     def remove_item(self):
         sender = self.sender()
         sender.widget.setHidden(True)
@@ -675,6 +672,9 @@ class combobox_multiple(QtWidgets.QWidget):
         self.value = value
 
         self.add_layout_items()
+
+
+
 
 
 class communicate(Qt.QtCore.QObject):
