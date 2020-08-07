@@ -8,7 +8,6 @@ from external.Qt import QtWidgets, QtCore, QtCompat, QtGui, Qt
 import main
 
 from animation import animateWidgetSize
-#from widgets import combobox_multiple, floating_combobox_multiple
 import icon
 
 from widgets import combobox_multiple
@@ -755,9 +754,6 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget.setMinimumHeight(height_sum)
 
         self.tableWidget.resizeRowsToContents()
-
-        print "Update item height:", height_sum
-
     def add_layout_items(self):
         print "context_maya.add_layout_items"
         if self.rows is None:
@@ -801,6 +797,8 @@ class dict_holder(QtWidgets.QWidget):
                         widget =  QtWidgets.QDoubleSpinBox()
                         widget.setMaximum(99999)
                         widget.setMinimum(-99999)
+                        widget.setSingleStep(0.01)
+                        widget.setDecimals(3)
                     elif type == "int":
                         widget = QtWidgets.QSpinBox()
                         widget.setMaximum(99999)
@@ -809,6 +807,8 @@ class dict_holder(QtWidgets.QWidget):
                         widget = QtWidgets.QComboBox()
                         # Add options
                         widget.addItems([str(option) for option in options_list[row]])
+                        if defaultValue_list[row] is not None:
+                            widget.setCurrentText(defaultValue_list[row])
                     elif type == "selectMultiple":
                         widget = combobox_multiple()
                         widget.emitter.value.connect(self.update_layout)

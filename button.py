@@ -331,13 +331,14 @@ class valueButton(QtWidgets.QToolButton):
                 self.set_text(valueName)
 
                 # Check missing geo
-
                 if self.value is not None:
                     if len(self.value) != 0:
                         existing_geo = [x for x in self.static_value if pm.objExists(x)]
                         self.missing_value = list(set(self.static_value) - set(existing_geo))
                         if self.missing_value:
-                            print "The following item dont exist in the scene", self.missing_value
+                            print "The following item dont exist in the scene:"
+                            for x in self.missing_value:
+                                print "MISSING OBJECT:", x
                             self.setStyleSheet(self.errorStyleSheet)
                             self.add_menu_items()
             else:

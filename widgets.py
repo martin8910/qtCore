@@ -23,7 +23,8 @@ def create_header(title="My Amazing header", layout=None, icon=None):
     # Add widget and set card size
     headerWidgetHolder = QtWidgets.QListWidgetItem(layout)
 
-    headerWidgetHolder.setFlags(QtCore.Qt.ItemIsSelectable == False)
+    headerWidgetHolder.setFlags(headerWidgetHolder.flags() & QtCore.Qt.ItemIsSelectable)
+    #headerWidgetHolder.setFlags(QtCore.Qt.ItemIsSelectable == False)
 
     # Set a name of the widget to the WidgetItem
     headerWidgetHolder.setData(109, headerWidget)
