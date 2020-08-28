@@ -646,7 +646,6 @@ class dict_holder(QtWidgets.QWidget):
         widget.setMaximumHeight(20)
         self.topLayout.addWidget(widget)
 
-
         spacer = main.create_spacer(mode="vertical")
         layout.addItem(spacer)
 
@@ -755,6 +754,7 @@ class dict_holder(QtWidgets.QWidget):
 
         self.tableWidget.resizeRowsToContents()
     def add_layout_items(self):
+        '''Add items to the object based on current data'''
         print "context_maya.add_layout_items"
         if self.rows is None:
             pass
@@ -762,6 +762,7 @@ class dict_holder(QtWidgets.QWidget):
             title_list = [x.title for x in self.rows]
             options_list = [x.options for x in self.rows]
             defaultValue_list = [x.defaultValue for x in self.rows]
+            multiple_list = [x.multiple for x in self.rows]
             type_list = [x.type for x in self.rows]
 
             item_value_list = [[item[title] for title in title_list] for item in self.value]
@@ -786,7 +787,6 @@ class dict_holder(QtWidgets.QWidget):
                     # Create item holder
                     item = QtWidgets.QTableWidgetItem()
                     self.tableWidget.setItem(index, row, item)
-
                     # Create based on type
                     if type == "str":
                         widget = QtWidgets.QLineEdit("")
@@ -834,6 +834,9 @@ class dict_holder(QtWidgets.QWidget):
                         widget = attribute_holder()
                         widget.emitter.value.connect(self.update_layout)
                         widget.emitter.value.connect(self.update_values)
+                        print "Multiple:", multiple_list[row]
+                        widget.set_multiple(multiple_list[row])
+                        #multiple_list
                     elif type == "objectMultiple":
                         widget = valueButton()
                         widget.set_text("Add Object(s)")
