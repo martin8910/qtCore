@@ -338,8 +338,13 @@ class attribute_holder(QtWidgets.QWidget):
         button_value = self.select_button.get_value(static=True)
         if button_value != None:
             node_type = pm.nodeType(button_value)
+            classifications = pm.getClassification(node_type)[-1]
             if node_type == "blendShape":
                 attributes = pm.listAttr(str(button_value[0]) + ".w", m=True)
+            elif "utility" in classifications:
+                input_attr = pm.listAttr(button_value, keyable=True, visible=True, locked=False)
+                output_attr = pm.listAttr(button_value, output=True, readOnly=True)
+                attributes = input_attr + output_attr
             else:
                 attributes = pm.listAttr(button_value, keyable=True, visible=True, locked=False, shortNames=True)
             self.attribute_button.set_options(attributes)
@@ -617,14 +622,29 @@ class dict_holder(QtWidgets.QWidget):
             self.setStyleSheet(sheet.read())
 
         # Remove button
-        self.remove_button = QtWidgets.QPushButton("Remove Selected")
+        self.remove_button = QtWidgets.QPushButton("Remove")
         item_list.append(self.remove_button)
         self.remove_button.setObjectName("small_button")
         self.remove_button.clicked.connect(self.remove_item)
         self.remove_button.setHidden(True)
 
+        # Insert button
+        self.insert_button = QtWidgets.QPushButton("Insert")
+        item_list.append(self.insert_button)
+        self.insert_button.setObjectName("small_button")
+        self.insert_button.clicked.connect(self.insert_item)
+        self.insert_button.setHidden(True)
+
+        # Duplicate button
+        self.dup_button = QtWidgets.QPushButton("Duplicate")
+        item_list.append(self.dup_button)
+        self.dup_button.setObjectName("small_button")
+        self.dup_button.clicked.connect(self.duplicate_item)
+        self.dup_button.setHidden(True)
+
+
         # Main add item button
-        self.add_button = QtWidgets.QPushButton("Add Item")
+        self.add_button = QtWidgets.QPushButton("+ Add Item")
         item_list.append(self.add_button)
         self.add_button.setObjectName("small_button")
         self.add_button.clicked.connect(self.add_item)
@@ -684,6 +704,35 @@ class dict_holder(QtWidgets.QWidget):
         # Emit signal so other uis connected to this will get updated
         self.emitter.value.emit(1)
 
+    def insert_item(self):
+        '''Insert an item after the selected one'''
+
+        # Get current index
+        selected_index = self.tableWidget.currentRow()
+        print selected_index
+        if self.value is not None:
+            item = {key.title: None for key in self.rows}
+            self.value.insert(selected_index + 1, item)
+
+        self.add_layout_items()
+
+        # Emit signal so other uis connected to this will get updated
+        self.emitter.value.emit(1)
+
+    def duplicate_item(self):
+        '''Duplicate an item after the selected one'''
+
+        # Get current index
+        selected_index = self.tableWidget.currentRow()
+        if self.value is not None:
+            item = self.value[selected_index]
+            print "ITEM:", item
+            self.value.insert(selected_index + 1, item)
+
+        self.add_layout_items()
+
+        # Emit signal so other uis connected to this will get updated
+        self.emitter.value.emit(1)
 
     def set_value(self, in_value, animate=True):
 
@@ -732,8 +781,12 @@ class dict_holder(QtWidgets.QWidget):
         selected = self.tableWidget.currentRow()
         if selected is not -1:
             self.remove_button.setHidden(False)
+            self.insert_button.setHidden(False)
+            self.dup_button.setHidden(False)
         else:
             self.remove_button.setHidden(True)
+            self.insert_button.setHidden(True)
+            self.dup_button.setHidden(True)
 
     def update_values(self):
         '''Update the values when value change'''
