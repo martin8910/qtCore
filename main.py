@@ -22,6 +22,7 @@ def qtUiLoader(uifile, widget=None):
 def get_value(object, static=False):
     '''Get the current value from a input field, numeric slider etc'''
     # Get type
+    print "Type:", type(object)
     if type(object) == QtWidgets.QLineEdit:  #QLineEdit
         value = object.text()
     elif type(object) == QtWidgets.QTextEdit:  #QTextEdit
@@ -44,6 +45,9 @@ def get_value(object, static=False):
         value = object.get_value()
     elif "dict_holder" in str(type(object)):  #Dictionary Holder
         value = object.get_values()
+    elif "floating_combobox_multiple" in str(type(object)):  #ValueButton
+        value = object.get_value()
+
     elif "combobox_multiple" in str(type(object)):  #ValueButton
         value = object.get_value()
     elif "attribute_holder" in str(type(object)):  #Combobox Multiple
@@ -127,9 +131,17 @@ def connect_value_change(object, connection=None):
             for row, header_type in enumerate(type_list):
                 widget = object.tableWidget.cellWidget(index, row)
                 connect_value_change(widget, connection=connection)
+
+    elif "floating_combobox_multiple" in str(type(object)):  # ValueButton
+        object.expand_button.clicked.connect(connection)
+        #object.holder.textEdited.connect(connection)
+        for c in object.actions:
+            c.triggered.connect(connection)
+            #c.triggered.connect(self.update_values)
+
     elif "combobox_multiple" in str(type(object)):  # ValueButton
         object.expand_button.clicked.connect(connection)
-        object.holder.textEdited.connect(connection)
+        #object.holder.textEdited.connect(connection)
         for c in object.checkboxes:
             c.clicked.connect(connection)
     elif type(object) == QtWidgets.QLabel:

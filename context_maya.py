@@ -66,7 +66,7 @@ class floating_combobox_multiple(QtWidgets.QWidget):
         layout.addItem(spacer)
 
         self.expand_button = QtWidgets.QToolButton(self)
-        self.expand_button.setText("Select Attr")
+        self.expand_button.setText("Select values")
         self.expand_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
         self.expand_button.setIconSize(QtCore.QSize(10, 10))
         icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
@@ -119,8 +119,10 @@ class floating_combobox_multiple(QtWidgets.QWidget):
     def update_values(self):
         sender = self.sender()
         # Reset value
+        print "SENDER:",sender
         list = []
         for action in self.actions:
+            print action, action.isChecked()
             if action.isChecked():
                 list.append(action.text())
 
@@ -130,9 +132,11 @@ class floating_combobox_multiple(QtWidgets.QWidget):
         self.emitter.value.emit(1)
 
         # Show the menu again to get multiple selections
+        print "Updating value"
         self.menu.exec_()
 
     def get_value(self):
+        print "Returning floating box value:", self.value
         return self.value
 
     def set_options(self, options):
@@ -863,7 +867,8 @@ class dict_holder(QtWidgets.QWidget):
                         if defaultValue_list[row] is not None:
                             widget.setCurrentText(defaultValue_list[row])
                     elif type == "selectMultiple":
-                        widget = combobox_multiple()
+                        widget = floating_combobox_multiple(self)
+                        #widget = combobox_multiple()
                         widget.emitter.value.connect(self.update_layout)
                         widget.set_options(options_list[row])
                         if defaultValue_list[row] is not None:
@@ -887,7 +892,6 @@ class dict_holder(QtWidgets.QWidget):
                         widget = attribute_holder()
                         widget.emitter.value.connect(self.update_layout)
                         widget.emitter.value.connect(self.update_values)
-                        print "Multiple:", multiple_list[row]
                         widget.set_multiple(multiple_list[row])
                         #multiple_list
                     elif type == "objectMultiple":
