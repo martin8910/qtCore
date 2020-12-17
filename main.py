@@ -22,7 +22,6 @@ def qtUiLoader(uifile, widget=None):
 def get_value(object, static=False):
     '''Get the current value from a input field, numeric slider etc'''
     # Get type
-    print "Type:", type(object)
     if type(object) == QtWidgets.QLineEdit:  #QLineEdit
         value = object.text()
     elif type(object) == QtWidgets.QTextEdit:  #QTextEdit

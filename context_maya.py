@@ -119,10 +119,8 @@ class floating_combobox_multiple(QtWidgets.QWidget):
     def update_values(self):
         sender = self.sender()
         # Reset value
-        print "SENDER:",sender
         list = []
         for action in self.actions:
-            print action, action.isChecked()
             if action.isChecked():
                 list.append(action.text())
 
@@ -132,7 +130,6 @@ class floating_combobox_multiple(QtWidgets.QWidget):
         self.emitter.value.emit(1)
 
         # Show the menu again to get multiple selections
-        print "Updating value"
         self.menu.exec_()
 
     def get_value(self):
@@ -350,7 +347,7 @@ class attribute_holder(QtWidgets.QWidget):
                 output_attr = pm.listAttr(button_value, output=True, readOnly=True)
                 attributes = input_attr + output_attr
             else:
-                attributes = pm.listAttr(button_value, keyable=True, visible=True, locked=False, shortNames=True)
+                attributes = pm.listAttr(button_value, keyable=True, visible=True, locked=False, shortNames=False)
             self.attribute_button.set_options(attributes)
             self.attribute_button.setHidden(False)
             self.value["object"] = button_value
@@ -713,7 +710,6 @@ class dict_holder(QtWidgets.QWidget):
 
         # Get current index
         selected_index = self.tableWidget.currentRow()
-        print selected_index
         if self.value is not None:
             item = {key.title: None for key in self.rows}
             self.value.insert(selected_index + 1, item)
@@ -730,7 +726,6 @@ class dict_holder(QtWidgets.QWidget):
         selected_index = self.tableWidget.currentRow()
         if self.value is not None:
             item = self.value[selected_index]
-            print "ITEM:", item
             self.value.insert(selected_index + 1, item)
 
         self.add_layout_items()
@@ -812,7 +807,6 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget.resizeRowsToContents()
     def add_layout_items(self):
         '''Add items to the object based on current data'''
-        print "context_maya.add_layout_items"
         if self.rows is None:
             pass
         else:
