@@ -338,17 +338,24 @@ class attribute_holder(QtWidgets.QWidget):
         # Get object
         button_value = self.select_button.get_value(static=True)
         if button_value != None:
-            node_type = pm.nodeType(button_value)
-            classifications = pm.getClassification(node_type)[-1]
-            if node_type == "blendShape":
-                attributes = pm.listAttr(str(button_value[0]) + ".w", m=True)
-            elif "utility" in classifications:
-                input_attr = pm.listAttr(button_value, keyable=True, visible=True, locked=False)
-                output_attr = pm.listAttr(button_value, output=True, readOnly=True)
-                attributes = input_attr + output_attr
-            else:
-                attributes = pm.listAttr(button_value, keyable=True, visible=True, locked=False, shortNames=False)
-            self.attribute_button.set_options(attributes)
+            all_attributes = []
+            attribute_lists = []
+            for x in button_value:
+                node_type = pm.nodeType(x)
+                classifications = pm.getClassification(node_type)[-1]
+                if node_type == "blendShape":
+                    attribute_lists.append(pm.listAttr(str(x) + ".w", m=True))
+                elif "utility" in classifications:
+                    input_attr = pm.listAttr(x, keyable=True, visible=True, locked=False)
+                    output_attr = pm.listAttr(x, output=True, readOnly=True)
+                    attribute_lists.append(input_attr + output_attr)
+                else:
+                    attribute_lists.append(pm.listAttr(x, keyable=True, visible=True, locked=False, shortNames=False))
+
+            #Sort and filter out only attributes existing in all controllers
+            unice_attributes = set([x for y in attribute_lists for x in y])
+            common_attributes = [x for x in unice_attributes if all(x in list for list in attribute_lists) == True]
+            self.attribute_button.set_options(sorted(common_attributes))
             self.attribute_button.setHidden(False)
             self.value["object"] = button_value
         else:
@@ -453,6 +460,12 @@ class pymel_holder(QtWidgets.QWidget):
         self.expand_button.setHidden(True)
         self.reset_all_button.setHidden(True)
 
+        buttons = [self.reset_all_button, self.expand_button]
+        for button in buttons:
+            button.setMinimumSize(button.sizeHint().width(), button.sizeHint().width())
+
+
+
         # Set main layout
         self.setLayout(self.topLayout)
 
@@ -464,13 +477,13 @@ class pymel_holder(QtWidgets.QWidget):
         widget = self.holder_frame
         if self.holder_frame.isHidden() is False:
             animateWidgetSize(widget, start=(widget.size().width(), widget.size().height()),
-                              end=(widget.size().width(), 0), expanding=False, duration=50, bounce=True,
+                              end=(widget.size().width(), 0), expanding=False, duration=10, bounce=True,
                               finishAction=lambda: widget.setHidden(True))
         else:
             widget.setHidden(False)
             animateWidgetSize(widget, start=(widget.size().width(), 0),
                                      end=(widget.size().width(), widget.sizeHint().height()),
-                                     expanding=True, duration=50, bounce=False)
+                                     expanding=True, duration=10, bounce=False)
 
 
     def reset_all_values(self):
@@ -493,14 +506,15 @@ class pymel_holder(QtWidgets.QWidget):
                 height = button.sizeHint().height()
                 if button.isHidden():
                     button.setHidden(False)
-                    animateWidgetSize(button, start=(0, height), end=(width, height), duration=500,attributelist=("maximumSize", "minimumSize"), bounce=False, expanding=True)
+                    #animateWidgetSize(button, start=(0, height), end=(width, height), duration=0,attributelist=("maximumSize", "minimumSize"), bounce=False, expanding=True)
 
         else:
             for button in buttons:
                 width = button.sizeHint().width()
                 height = button.size().height()
-                if button.isHidden() is False:
-                    animateWidgetSize(button, start=(width, height), end=(0, height), duration=500,attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False, finishAction = lambda: [b.setHidden(True) for b in buttons])
+                button.setHidden(True)
+                #if button.isHidden() is False:
+                    #animateWidgetSize(button, start=(width, height), end=(0, height), duration=0,attributelist=("maximumSize", "minimumSize"), expanding=True, bounce=False, finishAction = lambda: [b.setHidden(True) for b in buttons])
     def add_from_button(self):
         button_value = self.select_button.get_value(static=True)
 
@@ -622,6 +636,13 @@ class dict_holder(QtWidgets.QWidget):
         with open(stylesheet_path, "r") as sheet:
             self.setStyleSheet(sheet.read())
 
+        # Title card
+        self.title = QtWidgets.QLabel("Dict Holder Title")
+        #self.title.setStyleSheet("background-color: rgb(250,0,0)")
+        item_list.append(self.title)
+
+        item_list.append(main.create_spacer(mode="vertical"))
+
         # Remove button
         self.remove_button = QtWidgets.QPushButton("Remove")
         item_list.append(self.remove_button)
@@ -658,10 +679,11 @@ class dict_holder(QtWidgets.QWidget):
 
         # Create main widget
         widget = QtWidgets.QWidget()
+        #widget.setStyleSheet("background-color: rgb(0,250,0)")
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(3)
-        layout.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
-        layout.setContentsMargins(0,0, 0, 0)
+        #layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        layout.setContentsMargins(2,2, 2, 2)
         widget.setLayout(layout)
         widget.setMinimumHeight(20)
         widget.setMaximumHeight(20)
@@ -677,13 +699,16 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget = QtWidgets.QTableWidget()
         self.tableWidget.itemSelectionChanged.connect(self.update_buttons)
         self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.tableWidget.setShowGrid(False)
-        self.tableWidget.verticalHeader().setMinimumSectionSize(30)
+        self.tableWidget.setShowGrid(True)
+        self.tableWidget.verticalHeader().setMinimumSectionSize(25)
         self.tableWidget.setCornerWidget(None)
         self.tableWidget.setAlternatingRowColors(True)
         self.tableWidget.currentCellChanged.connect(self.update_values)
         self.tableWidget.setTabKeyNavigation(False)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
         self.topLayout.addWidget(self.tableWidget)
+
 
         # Set main layout
         self.setLayout(self.topLayout)
@@ -795,6 +820,8 @@ class dict_holder(QtWidgets.QWidget):
         # Emit signal so other uis connected to this will get updated
         self.emitter.value.emit(1)
 
+        self.update_layout()
+
     def update_layout(self):
         vertHeader = self.tableWidget.verticalHeader()
         horHeader = self.tableWidget.horizontalHeader()
@@ -804,7 +831,15 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget.setMaximumHeight(height_sum)
         self.tableWidget.setMinimumHeight(height_sum)
 
-        self.tableWidget.resizeRowsToContents()
+        #self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableWidget.resizeColumnsToContents()
+        #self.tableWidget.resizeRowsToContents()
+
+
+        #horHeader = self.tableWidget.horizontalHeader()
+        horHeader.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        #horHeader.setCascadingSectionResizes(True)
+
     def add_layout_items(self):
         '''Add items to the object based on current data'''
         if self.rows is None:
@@ -820,9 +855,9 @@ class dict_holder(QtWidgets.QWidget):
 
             self.tableWidget.setColumnCount(len(title_list))
             self.tableWidget.setHorizontalHeaderLabels(title_list)
-            horHeader = self.tableWidget.horizontalHeader()
-            horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-            horHeader.setCascadingSectionResizes(True)
+            #horHeader = self.tableWidget.horizontalHeader()
+            #horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            #horHeader.setCascadingSectionResizes(False)
 
             # Disable updates
             self.tableWidget.setUpdatesEnabled(False)
@@ -841,7 +876,7 @@ class dict_holder(QtWidgets.QWidget):
                     # Create based on type
                     if type == "str":
                         widget = QtWidgets.QLineEdit("")
-                        widget.setText("Undefined")
+                        widget.setText("Undefined text that are really really long")
                         if defaultValue_list[row] is not None:
                             widget.setText(defaultValue_list[row])
                     elif type == "float":
@@ -850,10 +885,14 @@ class dict_holder(QtWidgets.QWidget):
                         widget.setMinimum(-99999)
                         widget.setSingleStep(0.01)
                         widget.setDecimals(3)
+                        if defaultValue_list[row] is not None:
+                            widget.setValue(defaultValue_list[row])
                     elif type == "int":
                         widget = QtWidgets.QSpinBox()
                         widget.setMaximum(99999)
                         widget.setMinimum(-99999)
+                        if defaultValue_list[row] is not None:
+                            widget.setValue(defaultValue_list[row])
                     elif type == "selectSingle":
                         widget = QtWidgets.QComboBox()
                         # Add options
@@ -879,7 +918,7 @@ class dict_holder(QtWidgets.QWidget):
                         widget = main.colorInput()
                     elif type == "objectSingle":
                         widget = valueButton()
-                        widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+                        #widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
                         widget.multiple = False
                         widget.set_text("Add Object")
                     elif type == "objectAttribute":
@@ -898,6 +937,9 @@ class dict_holder(QtWidgets.QWidget):
                     self.tableWidget.setCellWidget(index, row, widget)
                     widgets.append(widget)
 
+                    #widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+                    #widget.setStyleSheet("background-color: rgb(250,0,0)")
+
                     # Set value from data
                     if value[row] is not None:
                         main.set_value(widget, value[row])
@@ -907,11 +949,7 @@ class dict_holder(QtWidgets.QWidget):
 
                 row_widgets.append(widgets)
 
-            # Disable updates
-            self.tableWidget.setUpdatesEnabled(True)
-            self.tableWidget.blockSignals(False)
 
-            self.update_layout()
 
             # Set tab behavior by row instead of column
             if len(row_widgets) >= 2:
@@ -919,6 +957,11 @@ class dict_holder(QtWidgets.QWidget):
                     for number, x in enumerate(item):
                         self.tableWidget.setTabOrder(item[number - 1], x)  # c to d
 
+            self.update_layout()
+
+            # Disable updates
+            self.tableWidget.setUpdatesEnabled(True)
+            self.tableWidget.blockSignals(False)
 
 
 class communicate(Qt.QtCore.QObject):

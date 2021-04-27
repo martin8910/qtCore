@@ -81,6 +81,12 @@ def picker_dialog(mode="AnyFile", filter=None, message="Open file/folder"):
     # Create dialog
     dialog = QtWidgets.QFileDialog()
 
+
+    # Set filter if asked for
+    if filter != None:
+        dialog.setNameFilter(filter)
+
+
     # Set mode
     if mode == "AnyFile":
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
@@ -97,14 +103,12 @@ def picker_dialog(mode="AnyFile", filter=None, message="Open file/folder"):
         dialog.setFileMode(QtWidgets.QFileDialog.DirectoryOnly)
 
 
-    # Set filter if asked for
-    if filter != None:
-        dialog.setNameFilter(filter)
-
     if "Directory" in mode:
         output = dialog.getExistingDirectory(None, message, filter=filter)
     elif mode == "SaveFile":
         output = dialog.getSaveFileName(None, message, filter=filter)[0]
+    elif mode == "ExistingFiles":
+        output = dialog.getSaveFileNames(None, message, filter=filter)
     else:
         output = dialog.getOpenFileName(None, message, filter=filter)
 

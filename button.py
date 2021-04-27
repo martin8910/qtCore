@@ -181,7 +181,10 @@ class valueButton(QtWidgets.QToolButton):
     def add_menu_items(self):
         items = []
         items.append(["Select Objects", self.select_value])
-        items.append(["Add selected", self.add_more_from_menu])
+        if len(pm.ls(sl=True)) >= 1:
+            items.append(["Add selected", self.add_more_from_menu])
+            #if self.check_if_selection_exists():
+            #    items.append(["Remove Selected", self.remove_selected_from_menu])
         items.append(["Reset Values", self.reset_value])
         if self.missing_value:
             items.append(["Remove missing", self.remove_missing_values])
@@ -199,7 +202,6 @@ class valueButton(QtWidgets.QToolButton):
             self.addAction(action)
 
     def add_more_from_menu(self):
-
         current_values = self.get_value(static=False)
         selection = pm.ls(sl=True)
         if len(selection) >= 1:
@@ -217,6 +219,38 @@ class valueButton(QtWidgets.QToolButton):
         else:
             print "WARNING: No selection to add from!"
 
+    def remove_selected_from_menu(self):
+        print "This will remove existing items"
+
+        # Get current selection
+        current_values = self.get_value(static=False)
+        selection = pm.ls(sl=True)
+        if len(selection) >= 1:
+            for object in selection:
+                valueName = object.name()
+                if valueName in current_values:
+                    if type(current_values[0]) == str or type(current_values[0]) == unicode:
+                        self.value.remove(object.name())
+                    else:
+                        self.value.remove(object)
+                else:
+                    print "WARNING: '{}' dont exist as a value".format(valueName)
+            self.set_header()
+            self.emitter.value.emit(1)
+
+    def check_if_selection_exists(self):
+        # Get current selection
+        return_value = False
+        current_values = self.get_value(static=False)
+        print "current_values:", current_values
+        if current_values:
+            selection = pm.ls(sl=True)
+            if len(selection) >= 1:
+                for object in selection:
+                    valueName = object.name()
+                    if valueName in current_values:
+                        return_value = True
+        return return_value
 
     def remove_missing_values(self):
 
@@ -374,6 +408,15 @@ class valueButton(QtWidgets.QToolButton):
 
     def select_value(self):
         pm.select(self.value)
+
+    # def mousePressEvent(self, event):
+    #     '''re-implemented to suppress Right-Clicks from selecting items.'''
+    #
+    #     if event.type() == QtCore.QEvent.MouseButtonPress:
+    #         if event.button() == QtCore.Qt.RightButton:
+    #             self.
+    #         else:
+    #             super(MyView, self).mousePressEvent(event)
 
     # def enterEvent(self, event):
     #     animation.fadeAnimation(start="current", end=self.endOpacity, duration=self.inAnimDuration,object=self.opacityEffect)
