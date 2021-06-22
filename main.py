@@ -1,8 +1,11 @@
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
 __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
-from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
-import animation
+from .external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
+from . import animation
 import os
 windowAnim = True
 
@@ -46,7 +49,6 @@ def get_value(object, static=False):
         value = object.get_values()
     elif "floating_combobox_multiple" in str(type(object)):  #ValueButton
         value = object.get_value()
-
     elif "combobox_multiple" in str(type(object)):  #ValueButton
         value = object.get_value()
     elif "attribute_holder" in str(type(object)):  #Combobox Multiple
@@ -61,9 +63,8 @@ def get_value(object, static=False):
         value = object.isChecked()
     elif type(object) == QtWidgets.QComboBox:  #QComboBox
         value = object.currentText()
-
     else:
-        print "GET VALUE: No supported type found for '{}'".format(type(object))
+        print("GET VALUE: No supported type found for '{}'".format(type(object)))
         value = None
 
     return value
@@ -103,7 +104,7 @@ def set_value(object, value):
     elif "attribute_holder" in str(type(object)):  #ValueButton
         object.set_value(object=value["object"], attributes=value["attributes"])
     else:
-        print "SET VALUE: No supported type found for '{}'".format(type(object))
+        print("SET VALUE: No supported type found for '{}'".format(type(object)))
         value = None
 
     return value
@@ -144,7 +145,7 @@ def connect_value_change(object, connection=None):
         for c in object.checkboxes:
             c.clicked.connect(connection)
     elif type(object) == QtWidgets.QLabel:
-        print "Setting connection on a label is not supported for now"
+        print("Setting connection on a label is not supported for now")
     elif type(object) == QtWidgets.QSpinBox:
         object.valueChanged.connect(connection)
     elif type(object) == QtWidgets.QTextEdit:
@@ -156,15 +157,13 @@ def connect_value_change(object, connection=None):
     elif type(object) == QtWidgets.QCheckBox:
         object.stateChanged.connect(connection)
     else:
-        print "CONNECT: No supported type found for '{}'".format(type(object))
+        print("CONNECT: No supported type found for '{}'".format(type(object)))
 
 
 
 def object_from_type(object):
     '''Return an object that accepts its input type'''
     # Get type
-    #print "TYPE:", type(object)
-    #print "VALUE:", object
     if type(object) == str or type(object) == unicode:
         widget = QtWidgets.QLineEdit()
         widget.setText(object)
@@ -182,39 +181,6 @@ def object_from_type(object):
         widget = QtWidgets.QPushButton("None")
     elif type(object) == dict:
         widget = QtWidgets.QPushButton("Dictionary")
-    #object = QtWidgets.QLineEdit()
-    #object = QtWidgets.QPushButton()
-    #object = QtWidgets.QLabel()
-    #object = QtWidgets.QSpinBox()
-    #object = QtWidgets.QTextEdit()
-    #object = QtWidgets.QDoubleSpinBox()
-    #object = QtWidgets.QComboBox()
-    #bject = QtWidgets.QCheckBox()
-    #"valueButton"
-    #"vectorInput"
-    #"colorInput"
-    #"pymel_holder"
-    #"dict_holder"
-    #"combobox_multiple"
-    #else:
-    #    print "SET VALUE: No supported type found for '{}'".format(type(object))
-    #    value = None
-    #print
-
-    # '''Connect the changecommand for a object based on its type'''
-    # if type(object) == QtWidgets.QLineEdit:
-    #     object.textChanged.connect(connection)
-    # elif type(object) == QtWidgets.QPushButton:
-    #     object.clicked.connect(connection)
-    # elif type(object) == QtWidgets.QLabel:
-    #     print "Setting connection on a label is not supported for now"
-    # elif type(object) == QtWidgets.QSpinBox:
-    # elif type(object) == QtWidgets.QTextEdit:
-    # elif type(object) == QtWidgets.QDoubleSpinBox:
-    # elif type(object) == QtWidgets.QComboBox:
-    # elif type(object) == QtWidgets.QCheckBox:
-    # else:
-    #     print "CONNECT: No supported type found for '{}'".format(type(object))
 
     return widget
 
@@ -235,7 +201,7 @@ def get_index_in_layout(item):
     if len(index) != 0:
         return index[0]
     else:
-        print "ERROR: Item not found in layout"
+        print("ERROR: Item not found in layout")
         return -1
 
 
@@ -263,7 +229,7 @@ def autoFieldWidth(inputObject, offset=0, minimum=0, animate=False):
     if width <= minimum: width = minimum
 
     if animate:
-        animation = QtCore.QPropertyAnimation(inputObject, "minimumWidth", inputObject)
+        animation = QtCore.QPropertyAnimation(inputObject, b"minimumWidth", inputObject)
 
         # Set start and end values
         animation.setStartValue(current_width)
@@ -302,9 +268,9 @@ def select_item_by_text(listWidget, text, data_position=None):
         if index != -1:
             listWidget.setCurrentRow(index)
         else:
-            print "Index probably not found:"
-            print "Input text", text
-            print "Index found", index
+            print("Index probably not found:")
+            print("Input text", text)
+            print("Index found", index)
 
     elif type(listWidget) ==  QtWidgets.QComboBox:
         index = listWidget.findText(str(text))
@@ -314,8 +280,8 @@ def select_item_by_text(listWidget, text, data_position=None):
         index = listWidget.findText(str(text))
         listWidget.setCurrentIndex(index)
     else:
-        print "No supported type provided for 'qtCore.select_item_by_text'"
-        print "TYPE:", type(listWidget)
+        print("No supported type provided for 'qtCore.select_item_by_text'")
+        print("TYPE:", type(listWidget))
 
 def add_items_to_layout(layout, items):
     for item in items:
@@ -465,7 +431,7 @@ class colorInput(QtWidgets.QWidget):
         self.values = [self.ui.value01.value(), self.ui.value02.value(), self.ui.value03.value()]
 
         # Set color of the button
-        self.ui.color_button.setStyleSheet('background-color: rgb({},{},{});border-radius: 5px;'.format(self.values[0], self.values[01], self.values[2]))
+        self.ui.color_button.setStyleSheet('background-color: rgb({},{},{});border-radius: 5px;'.format(self.values[0], self.values[1], self.values[2]))
 
 
 def create_spacer(mode="vertical"):
@@ -498,8 +464,8 @@ def read_stylesheet(widget, filepath):
         with open(filepath, "r") as sheet:
            widget.setStyleSheet(sheet.read())
     else:
-        print "ERROR The CSS path dont exists:"
-        print  filepath
+        print("ERROR The CSS path dont exists:")
+        print(filepath)
 
 def label_checkbox(object, on_title="On", off_title="Off"):
     '''Name a checkbox by a value'''

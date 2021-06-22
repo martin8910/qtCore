@@ -1,4 +1,7 @@
-from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
+from .external.Qt import QtWidgets, QtCore, QtGui, QtSvg
 
 # Load the svg
 def load_svg(iconPath, size=(20,20), assign_rgb=False):
@@ -44,7 +47,7 @@ def svg_icon(button=None, path=None, assign_rgb=False):
         try:
             size = (button.iconSize().width(), button.iconSize().height())
         except:
-            print "Unsupported type:", type(button)
+            print("Unsupported type:", type(button))
             size = (50,50)
 
     # Create pixmap from path
@@ -61,10 +64,10 @@ def svg_icon(button=None, path=None, assign_rgb=False):
     elif type(button) == QtWidgets.QAction:
         button.setIcon(QtGui.QIcon(svg_pixmap))
     else:
-        print "Unsupported type:", type(button)
+        print("Unsupported type:", type(button))
         try:
             button.setIcon(QtGui.QIcon(svg_pixmap))
-            print "Manage to set the size from icon.setIcon()"
+            print("Manage to set the size from icon.setIcon()")
         except: pass
     return svg_pixmap
 

@@ -1,9 +1,9 @@
-from animation import *
-from button import *
-from dialog import *
-from main import *
-from treeWidget import *
-from icon import *
-from widgets import *
-#import icon
-#import widgets
+from .animation import *
+from .button import *
+from .dialog import *
+from .main import *
+from .treeWidget import *
+from .icon import *
+from .widgets import *
+from . import icon
+from . import widgets

@@ -1,10 +1,12 @@
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
 __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
-from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg, Qt
-import animation
-import dialog
-import icon as qt_icon
+from .external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg, Qt
+from . import animation, dialog
+from . import icon as qt_icon
 
 import os
 try:
@@ -154,13 +156,13 @@ class valueButton(QtWidgets.QToolButton):
 
 
         # Create opacity effect
-        self.opacity = 0.8
+        #self.opacity = 1
         self.endOpacity = 1
         self.inAnimDuration = 100
         self.outAnimDuration = 400
-        self.opacityEffect = QtWidgets.QGraphicsOpacityEffect(self)
-        self.setGraphicsEffect(self.opacityEffect)
-        self.setAutoFillBackground(True)
+        #self.opacityEffect = QtWidgets.QGraphicsOpacityEffect(self)
+        #self.setGraphicsEffect(self.opacityEffect)
+        #self.setAutoFillBackground(True)
 
         self.clicked.connect(self.add_value)
 
@@ -213,14 +215,14 @@ class valueButton(QtWidgets.QToolButton):
                     else:
                         self.value.append(object)
                 else:
-                    print "WARNING: '{}' already exist as a value".format(valueName)
+                    print("WARNING: '{}' already exist as a value".format(valueName))
             self.set_header()
             self.emitter.value.emit(1)
         else:
-            print "WARNING: No selection to add from!"
+            print("WARNING: No selection to add from!")
 
     def remove_selected_from_menu(self):
-        print "This will remove existing items"
+        print("This will remove existing items")
 
         # Get current selection
         current_values = self.get_value(static=False)
@@ -234,7 +236,7 @@ class valueButton(QtWidgets.QToolButton):
                     else:
                         self.value.remove(object)
                 else:
-                    print "WARNING: '{}' dont exist as a value".format(valueName)
+                    print("WARNING: '{}' dont exist as a value".format(valueName))
             self.set_header()
             self.emitter.value.emit(1)
 
@@ -242,7 +244,7 @@ class valueButton(QtWidgets.QToolButton):
         # Get current selection
         return_value = False
         current_values = self.get_value(static=False)
-        print "current_values:", current_values
+        print("current_values:", current_values)
         if current_values:
             selection = pm.ls(sl=True)
             if len(selection) >= 1:
@@ -370,9 +372,9 @@ class valueButton(QtWidgets.QToolButton):
                         existing_geo = [x for x in self.static_value if pm.objExists(x)]
                         self.missing_value = list(set(self.static_value) - set(existing_geo))
                         if self.missing_value:
-                            print "The following item dont exist in the scene:"
+                            print("The following item dont exist in the scene:")
                             for x in self.missing_value:
-                                print "MISSING OBJECT:", x
+                                print("MISSING OBJECT:", x)
                             self.setStyleSheet(self.errorStyleSheet)
                             self.add_menu_items()
             else:
@@ -450,8 +452,6 @@ class dropButton(valueButton):
         self.setStyleSheet('background-color: rgb(250,250,250,50')
 
         droppedCommand = event.mimeData().text()
-        print droppedCommand
-        print event.mimeData()
 
 class pathButton(QtWidgets.QPushButton):
     '''Create a button that can store values for us'''

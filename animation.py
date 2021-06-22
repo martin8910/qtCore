@@ -1,7 +1,10 @@
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
 __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
-from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
+from .external.Qt import QtWidgets, QtCore, QtGui, QtSvg
 
 windowAnim = True
 
@@ -15,7 +18,7 @@ def fadeAnimation(start=0, end=1, duration=300, object=None, finishAction=None):
         if end is "current": end = object.opacity()
 
         # Animate window opasity
-        opasicyAnimation = QtCore.QPropertyAnimation(object, "opacity", object)
+        opasicyAnimation = QtCore.QPropertyAnimation(object, b"opacity", object)
         opasicyAnimation.setEasingCurve(style)
         opasicyAnimation.setDuration(duration)
         opasicyAnimation.setStartValue(start)
@@ -32,7 +35,7 @@ def fadeWindowAnimation(start=0, end=1, duration=300, object=None, finishAction=
         style.setType(QtCore.QEasingCurve.OutQuint)
 
         # Animate window opasity
-        opasicyAnimation = QtCore.QPropertyAnimation(object, "windowOpacity", object)
+        opasicyAnimation = QtCore.QPropertyAnimation(object, b"windowOpacity", object)
         opasicyAnimation.setEasingCurve(style)
         opasicyAnimation.setDuration(duration)
         opasicyAnimation.setStartValue(start)
@@ -75,7 +78,7 @@ def slideWindowAnimation(start=-100, end=0, duration=300, object=None, animation
         pos = object.pos()
 
         # Create animation and properties
-        slideAnimation = QtCore.QPropertyAnimation(object, 'pos', object)
+        slideAnimation = QtCore.QPropertyAnimation(object, b'pos', object)
         slideAnimation.setDuration(duration)
         style = QtCore.QEasingCurve()
         # Change curve if the value is end or beginning
@@ -99,7 +102,7 @@ def slideWindowBothAnimation(start=(-100, 0), end=(0, 0), duration=300, object=N
         pos = object.pos()
 
         # Create animation and properties
-        slideAnimation = QtCore.QPropertyAnimation(object, 'pos', object)
+        slideAnimation = QtCore.QPropertyAnimation(object, b'pos', object)
         slideAnimation.setDuration(duration)
         style = QtCore.QEasingCurve()
         # Change curve if the value is end or beginning
@@ -141,8 +144,7 @@ def simple_property_animation(startValue=None, endValue=None, duration=500,objec
     animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
 
 def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, property="iconSize",mode="InOutQuint", finishAction=None):
-    animation = QtCore.QPropertyAnimation(object, property, object)
-    # Easing
+    animation = QtCore.QPropertyAnimation(object, property.encode("utf-8"), object)
 
     style = QtCore.QEasingCurve()
     if mode == "Linear": style.setType(QtCore.QEasingCurve.Linear)
@@ -167,9 +169,8 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
         style.setType(QtCore.QEasingCurve.OutBounce)
         style.setAmplitude(0.5)
     else:
-        print "Mode not supported:",mode
+        print("Mode not supported:",mode)
         style.setType(QtCore.QEasingCurve.InOutQuint)
-
 
     animation.setEasingCurve(style)
 
@@ -181,11 +182,15 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
     if start[0] == "current":
         if property == "iconSize":
             startValueX = object.iconSize().height()
+        if property == "maximumSize" or property == "minimumSize":
+            startValueY = object.size().height()
     else:
         startValueX = start[0]
     if start[1] == "current":
         if property == "iconSize":
             startValueY = object.iconSize().width()
+        if property == "maximumSize" or property == "minimumSize":
+            startValueY = object.size().width()
     else:
         startValueY = start[1]
     animation.setStartValue(QtCore.QSize(startValueX, startValueY))
@@ -199,11 +204,11 @@ def propertyAnimation(start=[0, 0], end=[30, 0], duration=300, object=None, prop
     animation.start(QtCore.QPropertyAnimation.DeleteWhenStopped)
 
 
+
 # Version 1.5 of the aninmation widgetsize that works for horizontal elements as well
 def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False, attributelist=("minimumSize", "maximumSize"), duration=False, bounce=True,finishAction=None):
     '''Animate an objects width/height'''
 
-    #print "MIN-WIDTH:", element.minimumWidth()
     # Generate automatic duration based on length if not specified
     if not duration:
         duration = min(abs(start[1] - end[1]) * 5, 500)

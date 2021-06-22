@@ -1,15 +1,14 @@
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
 __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
-from external.Qt import QtWidgets, QtCore, QtGui, QtSvg
-#import context_maya
-import icon as qt_icon
-import animation
-
-
-
+from .external.Qt import QtWidgets, QtCore, QtGui, QtSvg
+from . import icon as qt_icon
+from . import animation, main
 import os
-import main
+
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 
 
@@ -99,7 +98,6 @@ def picker_dialog(mode="AnyFile", filter=None, message="Open file/folder"):
     elif mode == "ExistingFiles":
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)
     elif mode == "DirectoryOnly":
-        print "Only directory"
         dialog.setFileMode(QtWidgets.QFileDialog.DirectoryOnly)
 
 
@@ -113,130 +111,6 @@ def picker_dialog(mode="AnyFile", filter=None, message="Open file/folder"):
         output = dialog.getOpenFileName(None, message, filter=filter)
 
     return output
-
-# def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None, action=None):
-#     window = button.parent().window()
-#     '''Create a popup object from the current sender'''
-#     global popup
-#     popup = info_popup(widget=window)
-#     popup.setText(text)
-#     if actionText != None:
-#         popup.set_action_text(actionText)
-#         popup.set_action(action)
-#
-#     popup.setHeader(header)
-#     popup.setIcon(icon)
-#     popup.show()
-#
-# class info_popup(QtWidgets.QWidget):
-#     def __init__(self, parent = None, widget=None):
-#         super(info_popup, self).__init__()
-#         self.ui = main.qtUiLoader("{}popupCardSimple.ui".format(relativePath + os.sep + "ui" + os.sep))
-#         self.layout = QtWidgets.QVBoxLayout()
-#         self.layout.addWidget(self.ui)
-#         self.layout.setSpacing(0)
-#         self.layout.setContentsMargins(0, 0, 0, 0)
-#         self.setLayout(self.layout)
-#
-#
-#         #Hide action on default
-#         self.ui.actionButton.hide()
-#         self.executeAction = None
-#
-#
-#         # Tag this widget as a popup
-#         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-#         self.setAutoFillBackground(True)
-#         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-#         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
-#         self.ui.actionButton.clicked.connect(self.execute_action)
-#
-#         # calculate the botoom right point from the parents rectangle
-#         #point = widget.srect().bottomRight()
-#         #print point
-#
-#         # Set image
-#         iconFile = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + "plugIcon.svg"),size=(15,15))
-#         self.ui.icon.setIcon(iconFile)
-#
-#         # map that point as a global position
-#         global_point = QtGui.QCursor.pos()
-#
-#         self.adjustSize()
-#
-#         #Position based on the cursor
-#         self.move(global_point - QtCore.QPoint((self.width() * 3), 0))
-#         self.ui.closeButton.clicked.connect(self.hide)
-#         self.setAttribute(QtCore.Qt.WA_ShowWithoutActivating)
-#
-#     def mousePressEvent(self, event):
-#         self.offset = event.pos()
-#
-#     def mouseMoveEvent(self, event):
-#         try:
-#             x = event.globalX()
-#             y = event.globalY()
-#             x_w = self.offset.x()
-#             y_w = self.offset.y()
-#             self.move(x - x_w, y - y_w)
-#         except:
-#             pass
-#
-#
-#     def hide(self):
-#         animation.fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
-#         animation.slideWindowBothAnimation(start=(0, 0), end=(30, 0), duration=150, object=self)
-#         #self.deleteLater()
-#
-#     def set_action_text(self, input):
-#         self.ui.actionButton.setText(input)
-#         self.ui.actionButton.show()
-#
-#     def set_action(self, action=None):
-#         if action != None:
-#             self.executeAction = action
-#             self.ui.actionButton.show()
-#
-#     def execute_action(self):
-#         print self.executeAction
-#         if self.executeAction != None:
-#             exec(self.executeAction)
-#
-#         # Close popup
-#         self.hide()
-#
-#
-#     def setText(self, text):
-#         self.ui.infoLabel.setText(text)
-#
-#         # Calculate size
-#         # Measure text
-#         #metrics = QtGui.QFontMetrics(self.ui.infoLabel.font())
-#         #newWidth = metrics.width(text)
-#
-#         # Set small size to the fill out with what it needs
-#         self.resize(20, 20)  # width, height
-#
-#         global_point = QtGui.QCursor.pos()
-#         #self.adjustSize()
-#         self.move(global_point - QtCore.QPoint((self.width()) - 10, self.height() - 10))
-#         animation.slideWindowBothAnimation(start=(30, 0), end=(0, 0), duration=400, object=self)
-#         self.ui.infoLabel.adjustSize()
-#
-#     def setHeader(self, text):
-#         self.ui.header.setText(text)
-#
-#     def setIcon(self, text):
-#         # Set image
-#         iconFile = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + text + ".svg"),size=(15,15))
-#         self.ui.icon.setIcon(iconFile)
-#
-#     def closeEvent(self, event):
-#         event.accept()
-#         animation.fadeWindowAnimation(start=1, end=0, duration=400, object=self, finishAction=self.deleteLater)
-#
-
-
 
 
 def activatePopup(button, text, header="Info", icon="infoIcon", actionText=None, action=None):
@@ -275,10 +149,6 @@ class info_popup(QtWidgets.QWidget):
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
         self.ui.actionButton.clicked.connect(self.execute_action)
-
-        # calculate the botoom right point from the parents rectangle
-        #point = widget.srect().bottomRight()
-        #print point
 
         # Set image
         iconFile = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + "plugIcon.svg"),size=(15,15))

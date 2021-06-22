@@ -1,11 +1,11 @@
-from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg, Qt
+from __future__ import print_function
+# -*- coding: utf-8 -*-
 
-import main
-import animation
-from button import valueButton, fadeButton
-from icon import svg_icon
+from .external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg, Qt
 
-import icon
+from . import main, animation, icon
+from .button import valueButton, fadeButton
+from .icon import svg_icon
 import os
 
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
@@ -184,21 +184,12 @@ class card_icon_ui(QtWidgets.QWidget):
 
 
     def enterEvent(self, event):
-        #print "This is when you enter the card"
-        #self.popupTimer = QtCore.QTimer(singleShot=True)
-        #self.popupTimer.timeout.connect(self.activatePopup)
-        #self.popupTimer.start(300)
-        #self.activatePopup()
-        #self.setFocus()
         pass
 
     def leaveEvent(self, event):
-        #print "This is when you leave the card"
-        #self.popup.hide()
         pass
     def set_icon(self, path):
         self.iconPath = path
-        #self.iconImage = QtGui.QPixmap(path)
         icon = qtCore.load_svg(path, size=(self.sizeFactor, self.sizeFactor))
         self.iconButton.setIcon(icon)
 
@@ -281,17 +272,9 @@ class card_simple_ui(QtWidgets.QWidget):
 
 
     def enterEvent(self, event):
-        #print "This is when you enter the card"
-        #self.popupTimer = QtCore.QTimer(singleShot=True)
-        #self.popupTimer.timeout.connect(self.activatePopup)
-        #self.popupTimer.start(300)
-        #self.activatePopup()
-        #self.setFocus()
         pass
 
     def leaveEvent(self, event):
-        #print "This is when you leave the card"
-        #self.popup.hide()
         pass
 
     def setTitle(self, title):
@@ -382,7 +365,6 @@ class collapsable_tab():
     def change_state(self, animate=True):
         '''Change the current state of the holder'''
         current_width = self.holder.size().width()
-        #print "WIDTH:", current_width
         current_height = self.holder.size().height()
         expanding = False
 
@@ -650,8 +632,6 @@ class combobox_multiple(QtWidgets.QWidget):
         self.emitter.value.emit(1)
 
     def get_value(self):
-        #print 'Getting value'
-        #print self.value
         return self.value
 
     def set_options(self, options):

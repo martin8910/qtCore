@@ -1,7 +1,10 @@
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
 __author__ = "Martin Gunnarsson"
 __email__ = "hello@deerstranger.com"
 
-from external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
+from .external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
 
 ###################################################################################################
 # Handle QTreeWidget/QTreeWidgetItems

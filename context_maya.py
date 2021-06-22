@@ -1,26 +1,26 @@
-import os
+from __future__ import print_function
+# -*- coding: utf-8 -*-
+
+import os, sys
 from maya import OpenMayaUI
 import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin, MayaQDockWidget
 import pymel.core as pm
 
-from external.Qt import QtWidgets, QtCore, QtCompat, QtGui, Qt
-import main
+from .external.Qt import QtWidgets, QtCore, QtCompat, QtGui, Qt
+from . import main, icon
+from .animation import animateWidgetSize, resizeWindowAnimation
+from .button import valueButton, fadeButton
+from .icon import svg_icon
 
-from animation import animateWidgetSize
-import icon
-
-from widgets import combobox_multiple
-from button import valueButton, fadeButton
-from icon import svg_icon
-import animation
-from dialog import activatePopup
+if sys.version_info >= (3, ):
+    # Python 3 compatibility
+    long = int
 
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 parentPath = os.path.abspath(os.path.join(relativePath, os.pardir))
 
 #Shiboken
-
 try:
     from shiboken import wrapInstance
     import shiboken
@@ -41,7 +41,6 @@ class floating_combobox_multiple(QtWidgets.QWidget):
 
         # Create communication slot
         self.emitter = communicate(self)
-
 
         self.active_icon_path = relativePath + os.sep + "icons" + os.sep + "checkbox_checked.svg"
         self.inactive_icon_path = relativePath + os.sep + "icons" + os.sep + "checkbox_unchecked.svg"
@@ -67,9 +66,9 @@ class floating_combobox_multiple(QtWidgets.QWidget):
 
         self.expand_button = QtWidgets.QToolButton(self)
         self.expand_button.setText("Select values")
-        self.expand_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
-        self.expand_button.setIconSize(QtCore.QSize(10, 10))
-        icon.svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
+        #self.expand_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+        #self.expand_button.setIconSize(QtCore.QSize(10, 10))
+        #svg_icon(button=self.expand_button, path=relativePath + os.sep + "icons" + os.sep + "tab_closed.svg")
         item_list.append(self.expand_button)
 
         # Create menu
@@ -133,7 +132,6 @@ class floating_combobox_multiple(QtWidgets.QWidget):
         self.menu.exec_()
 
     def get_value(self):
-        print "Returning floating box value:", self.value
         return self.value
 
     def set_options(self, options):
@@ -149,12 +147,13 @@ class floating_combobox_multiple(QtWidgets.QWidget):
         if len(value) >= 1:
             valueName = " , ".join([str(o) for o in value])
         else:
-            valueName = "Unassigned"
+            valueName = "[ None ]"
 
         self.expand_button.setText(valueName)
         self.value = value
 
-        #self.add_layout_items()
+        if self.options is not None:
+            self.add_layout_items()
 
 
 
@@ -236,7 +235,7 @@ class generic_dockable_window(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
 
     def animate_window_size(self, start=(300,400),end=(500,300),duration=800):
-        animation.resizeWindowAnimation(start=start, end=end, duration=800, object=self.window(),attribute="size")
+        resizeWindowAnimation(start=start, end=end, duration=800, object=self.window(),attribute="size")
 
 
 class generic_window(QtWidgets.QWidget):
@@ -261,7 +260,6 @@ class generic_window(QtWidgets.QWidget):
 
     def animate_window_size(self, start=(300,400),end=(500,300),duration=800):
         pass
-        #animation.resizeWindowAnimation(start=start, end=end, duration=800, object=self.window(),attribute="size")
 
 class attribute_holder(QtWidgets.QWidget):
     '''Holds a pymel object and extract its attributes in a list. Multiple let you choose multiple attributes.'''
@@ -340,7 +338,10 @@ class attribute_holder(QtWidgets.QWidget):
         if button_value != None:
             all_attributes = []
             attribute_lists = []
-            for x in button_value:
+
+            existing_geo = [x for x in button_value if pm.objExists(x)]
+            missing_geo = list(set(button_value) - set(existing_geo))
+            for x in existing_geo:
                 node_type = pm.nodeType(x)
                 classifications = pm.getClassification(node_type)[-1]
                 if node_type == "blendShape":
@@ -583,7 +584,7 @@ class pymel_holder(QtWidgets.QWidget):
                 valueName = object.name()
                 self.value.append(valueName)
         else:
-            print "No selection to add from"
+            print("No selection to add from")
 
         # Update interface
         self.set_value(self.value, animate=False)
@@ -605,7 +606,7 @@ class pymel_holder(QtWidgets.QWidget):
         # Make sure its a string
         for item in in_value:
             if "pymel" in type(item).__module__:
-                print "pymel_holder: ERROR, you are trying to feed me a pymel object instead of a string input"
+                print("pymel_holder: ERROR, you are trying to feed me a pymel object instead of a string input")
                 break
 
         # Sanity to see that all of the objects exists
@@ -685,8 +686,8 @@ class dict_holder(QtWidgets.QWidget):
         #layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         layout.setContentsMargins(2,2, 2, 2)
         widget.setLayout(layout)
-        widget.setMinimumHeight(20)
-        widget.setMaximumHeight(20)
+        widget.setMinimumHeight(25)
+        widget.setMaximumHeight(25)
         self.topLayout.addWidget(widget)
 
         spacer = main.create_spacer(mode="vertical")
@@ -700,12 +701,13 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget.itemSelectionChanged.connect(self.update_buttons)
         self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.tableWidget.setShowGrid(True)
-        self.tableWidget.verticalHeader().setMinimumSectionSize(25)
+        self.tableWidget.verticalHeader().setMinimumSectionSize(30)
         self.tableWidget.setCornerWidget(None)
         self.tableWidget.setAlternatingRowColors(True)
         self.tableWidget.currentCellChanged.connect(self.update_values)
         self.tableWidget.setTabKeyNavigation(False)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.setStyleSheet("selection-background-color: rgb(250,250,250,10)")
 
         self.topLayout.addWidget(self.tableWidget)
 
@@ -786,9 +788,11 @@ class dict_holder(QtWidgets.QWidget):
             for row in xrange(len(self.rows)):
                 item = self.tableWidget.cellWidget(index, row)
                 # Get value from item
-                value = main.get_value(item, static=True)
-
-                values.append(value)
+                if type(item) != None:
+                    value = main.get_value(item, static=True)
+                    values.append(value)
+                else:
+                    print("Problem getting value from:", index, row)
 
             # Combind values with titles
             title_list = [x.title for x in self.rows]
@@ -826,20 +830,23 @@ class dict_holder(QtWidgets.QWidget):
         vertHeader = self.tableWidget.verticalHeader()
         horHeader = self.tableWidget.horizontalHeader()
 
+        # Update height
         margin = self.tableWidget.getContentsMargins()
         height_sum = (vertHeader.length() + margin[0]) + horHeader.height() + margin[0]
         self.tableWidget.setMaximumHeight(height_sum)
         self.tableWidget.setMinimumHeight(height_sum)
 
-        #self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        #self.tableWidget.setVisible(False)
         self.tableWidget.resizeColumnsToContents()
+
+        #self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        #self.tableWidget.setVisible(True)
         #self.tableWidget.resizeRowsToContents()
 
 
         #horHeader = self.tableWidget.horizontalHeader()
-        horHeader.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         #horHeader.setCascadingSectionResizes(True)
-
     def add_layout_items(self):
         '''Add items to the object based on current data'''
         if self.rows is None:
@@ -852,7 +859,6 @@ class dict_holder(QtWidgets.QWidget):
             type_list = [x.type for x in self.rows]
 
             item_value_list = [[item[title] for title in title_list] for item in self.value]
-
             self.tableWidget.setColumnCount(len(title_list))
             self.tableWidget.setHorizontalHeaderLabels(title_list)
             #horHeader = self.tableWidget.horizontalHeader()
@@ -876,7 +882,8 @@ class dict_holder(QtWidgets.QWidget):
                     # Create based on type
                     if type == "str":
                         widget = QtWidgets.QLineEdit("")
-                        widget.setText("Undefined text that are really really long")
+                        #widget.setText("")
+                        widget.setStyleSheet("selection-background-color: rgb(0,250,250,150)")
                         if defaultValue_list[row] is not None:
                             widget.setText(defaultValue_list[row])
                     elif type == "float":
@@ -904,8 +911,9 @@ class dict_holder(QtWidgets.QWidget):
                         #widget = combobox_multiple()
                         widget.emitter.value.connect(self.update_layout)
                         widget.set_options(options_list[row])
+                        print("VALUE:", defaultValue_list[row])
                         if defaultValue_list[row] is not None:
-                            widget.set_value(defaultValue_list[row], animate=False)
+                            widget.set_value(defaultValue_list[row])
                     elif type == "bool":
                         widget = QtWidgets.QCheckBox()
                         if defaultValue_list[row] is not None:
@@ -931,7 +939,7 @@ class dict_holder(QtWidgets.QWidget):
                         widget = valueButton()
                         widget.set_text("Add Object(s)")
                     else:
-                        print "Type not supported"
+                        print("Type not supported")
                         widget = QtWidgets.QPushButton("?")
                     # Add to table
                     self.tableWidget.setCellWidget(index, row, widget)
