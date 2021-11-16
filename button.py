@@ -166,7 +166,7 @@ class valueButton(QtWidgets.QToolButton):
 
         self.clicked.connect(self.add_value)
 
-        self.textCutoff = 30
+        self.textCutoff = 20
 
         # Set style
         self.inactiveStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\n}QToolButton::menu-indicator{width:0px;}"
@@ -352,7 +352,7 @@ class valueButton(QtWidgets.QToolButton):
                         else:
                             valueName = [object.name() for object in value]
 
-                        valueName = ",".join(valueName)[:30]
+                        valueName = ",".join(valueName)[:20]
                         static_value = valueName
                     else:
                         valueName = "Nothing selected..."

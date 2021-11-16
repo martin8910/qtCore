@@ -118,6 +118,7 @@ class floating_combobox_multiple(QtWidgets.QWidget):
     def update_values(self):
         sender = self.sender()
         # Reset value
+
         list = []
         for action in self.actions:
             if action.isChecked():
@@ -125,11 +126,14 @@ class floating_combobox_multiple(QtWidgets.QWidget):
 
         self.set_value(list, animate=True)
 
-        # Emit update connection
-        self.emitter.value.emit(1)
+        print('Updateing float values', list)
+
 
         # Show the menu again to get multiple selections
         self.menu.exec_()
+
+        # Emit update connection
+        self.emitter.value.emit(1)
 
     def get_value(self):
         return self.value
@@ -269,6 +273,7 @@ class attribute_holder(QtWidgets.QWidget):
         item_list = []
         self.value = {"object":None, "attributes":[]}
         self.multiple_mode = True
+        self.only_keyable = True
 
         # Create communication slot
         self.emitter = communicate(self)
@@ -281,11 +286,12 @@ class attribute_holder(QtWidgets.QWidget):
         # Main value-button
         self.select_button = valueButton()
         self.select_button.multiple = False
-        self.select_button.set_text("Add From Selected")
+        self.select_button.set_text("  +  ")
         item_list.append(self.select_button)
         self.select_button.setObjectName("pymel_select_button")
         self.select_button.clicked.connect(self.update_attributes)
         self.select_button.emitter.value.connect(self.update_attributes)
+        #self.select_button.setMaximumWidth(20)
 
         # Create drop-down holder
         self.attribute_button = floating_combobox_multiple(self)
@@ -406,7 +412,7 @@ class pymel_holder(QtWidgets.QWidget):
             self.setStyleSheet(sheet.read())
 
         self.select_button = valueButton()
-        self.select_button.set_text("Add From Selected")
+        self.select_button.set_text("  +  ")
         item_list.append(self.select_button)
         self.select_button.setObjectName("pymel_select_button")
         self.select_button.clicked.connect(self.add_from_button)
@@ -637,29 +643,31 @@ class dict_holder(QtWidgets.QWidget):
         with open(stylesheet_path, "r") as sheet:
             self.setStyleSheet(sheet.read())
 
+
         # Title card
         self.title = QtWidgets.QLabel("Dict Holder Title")
-        #self.title.setStyleSheet("background-color: rgb(250,0,0)")
+        self.title.setStyleSheet("color: rgb(250,250,250);")
         item_list.append(self.title)
 
         item_list.append(main.create_spacer(mode="vertical"))
 
         # Remove button
-        self.remove_button = QtWidgets.QPushButton("Remove")
+        self.remove_button = QtWidgets.QPushButton("Remove", self)
         item_list.append(self.remove_button)
         self.remove_button.setObjectName("small_button")
         self.remove_button.clicked.connect(self.remove_item)
         self.remove_button.setHidden(True)
 
+
         # Insert button
-        self.insert_button = QtWidgets.QPushButton("Insert")
+        self.insert_button = QtWidgets.QPushButton("Insert", self)
         item_list.append(self.insert_button)
         self.insert_button.setObjectName("small_button")
         self.insert_button.clicked.connect(self.insert_item)
         self.insert_button.setHidden(True)
 
         # Duplicate button
-        self.dup_button = QtWidgets.QPushButton("Duplicate")
+        self.dup_button = QtWidgets.QPushButton("Duplicate", self)
         item_list.append(self.dup_button)
         self.dup_button.setObjectName("small_button")
         self.dup_button.clicked.connect(self.duplicate_item)
@@ -667,7 +675,7 @@ class dict_holder(QtWidgets.QWidget):
 
 
         # Main add item button
-        self.add_button = QtWidgets.QPushButton("+ Add Item")
+        self.add_button = QtWidgets.QPushButton("+ Add Item", self)
         item_list.append(self.add_button)
         self.add_button.setObjectName("small_button")
         self.add_button.clicked.connect(self.add_item)
@@ -690,10 +698,10 @@ class dict_holder(QtWidgets.QWidget):
         widget.setMaximumHeight(25)
         self.topLayout.addWidget(widget)
 
-        spacer = main.create_spacer(mode="vertical")
-        layout.addItem(spacer)
+        #spacer = main.create_spacer(mode="vertical")
+        #layout.addItem(spacer)
 
-        # Add items to layout
+        # Add buttons to layout
         main.add_items_to_layout(layout, item_list)
 
         # Create table
@@ -717,8 +725,12 @@ class dict_holder(QtWidgets.QWidget):
 
         self.rows = None
 
+    def set_title(self, title):
+        self.title.setText(title)
+
     def dropEvent(self, event):
         self.emitter.value.emit(1)
+
 
     def add_item(self):
         '''Add a empty value from the button'''
@@ -826,6 +838,9 @@ class dict_holder(QtWidgets.QWidget):
 
         self.update_layout()
 
+        print("Updating Dict Values")
+        print(self.value)
+
     def update_layout(self):
         vertHeader = self.tableWidget.verticalHeader()
         horHeader = self.tableWidget.horizontalHeader()
@@ -861,9 +876,6 @@ class dict_holder(QtWidgets.QWidget):
             item_value_list = [[item[title] for title in title_list] for item in self.value]
             self.tableWidget.setColumnCount(len(title_list))
             self.tableWidget.setHorizontalHeaderLabels(title_list)
-            #horHeader = self.tableWidget.horizontalHeader()
-            #horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-            #horHeader.setCascadingSectionResizes(False)
 
             # Disable updates
             self.tableWidget.setUpdatesEnabled(False)
@@ -910,8 +922,8 @@ class dict_holder(QtWidgets.QWidget):
                         widget = floating_combobox_multiple(self)
                         #widget = combobox_multiple()
                         widget.emitter.value.connect(self.update_layout)
+                        widget.menu.triggered.connect(self.update_layout)
                         widget.set_options(options_list[row])
-                        print("VALUE:", defaultValue_list[row])
                         if defaultValue_list[row] is not None:
                             widget.set_value(defaultValue_list[row])
                     elif type == "bool":
@@ -944,9 +956,6 @@ class dict_holder(QtWidgets.QWidget):
                     # Add to table
                     self.tableWidget.setCellWidget(index, row, widget)
                     widgets.append(widget)
-
-                    #widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-                    #widget.setStyleSheet("background-color: rgb(250,0,0)")
 
                     # Set value from data
                     if value[row] is not None:

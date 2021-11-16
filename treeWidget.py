@@ -76,3 +76,15 @@ def traverse_tree(treeWidgetItem):
 def get_items(treeWidget):
     '''Returns all item from a tree-Widget'''
     return treeWidget.findItems("", QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
+
+def select_items(tree, items=[]):
+    tree.clearSelection()
+    for item in items:
+        item.setSelected(True)
+
+    #tree.setSelectionMode(QListWidget.MultiSelection)
+    # index = ['data2', 'data3', 'data5']
+    # for i in index:
+    #     matching_items = tree.findItems(i, Qt.MatchExactly)
+    #     for item in matching_items:
+
