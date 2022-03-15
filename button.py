@@ -462,6 +462,7 @@ class pathButton(QtWidgets.QPushButton):
         self.value = None
         self.pathField = None
         self.mode = "Directory"
+        self.my_value = None
         self.message = "Open something for us. [Specify this with self.message]"
         # self.mode = ExistingFiles, DirectoryOnly, Directory, ExistingFile, SaveFile, AnyFile
         self.filter = None
@@ -473,29 +474,28 @@ class pathButton(QtWidgets.QPushButton):
         self.setStyleSheet('background-color: rgb(250,250,250,0')
         self.setFlat(True)
 
-
-    def add_value(self):
-        # Get current selection from the scene and add as values to this object
-        selection = pm.ls(sl=True)
-        if len(selection) >= 1:
-            self.value = selection
-            valueName = [object.name() for object in selection]
-
-            # Set text of button
-            self.setText(",".join(valueName)[:(int(self.width() * 0.15))])
+        self.clicked.connect(self.add_path)
 
 
+    def set_value(self, value):
+        '''Set the default value of the button'''
+        self.value = value
+        self.setText(self.value)
 
     def get_value(self):
-        if self.value != None:
-            if not self.multiple:
-                return self.value[0]
-            else: return self.value
+        if self.pathField != None:
+            if len(self.pathField.text()) >= 1:
+                return self.pathField.text()
+            else:
+                return self.value
+        else:
+            return self.value
 
     def add_path(self):
         file = dialog.picker_dialog(mode=self.mode, filter=self.filter)
         if self.pathField != None:
             self.pathField.setText(file[0])
+            self.value = file[0]
 
 
 class communicate(Qt.QtCore.QObject):

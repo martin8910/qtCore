@@ -12,6 +12,7 @@ from . import main, icon
 from .animation import animateWidgetSize, resizeWindowAnimation
 from .button import valueButton, fadeButton
 from .icon import svg_icon
+from .dialog import inputDialog
 
 if sys.version_info >= (3, ):
     # Python 3 compatibility
@@ -38,6 +39,7 @@ class floating_combobox_multiple(QtWidgets.QWidget):
         self.options = None
         self.value = []
         self.checkboxes = []
+        self.add_options = False
 
         # Create communication slot
         self.emitter = communicate(self)
@@ -115,6 +117,24 @@ class floating_combobox_multiple(QtWidgets.QWidget):
             if item in self.value:
                 action.setChecked(True)
 
+        if self.add_options:
+            # Add option to add your own value or not
+            add_action = QtWidgets.QAction(self)
+            add_action.setText("+ Add New")
+            self.menu.addAction(add_action)
+            add_action.triggered.connect(self.add_item_popup)
+
+
+    def add_item_popup(self):
+        print("Add input dialog")
+        add_name = inputDialog(self, header="Add Item", text="New item")
+        if add_name is not None:
+            self.options.append(add_name)
+        self.update_values()
+
+
+
+
     def update_values(self):
         sender = self.sender()
         # Reset value
@@ -125,9 +145,6 @@ class floating_combobox_multiple(QtWidgets.QWidget):
                 list.append(action.text())
 
         self.set_value(list, animate=True)
-
-        print('Updateing float values', list)
-
 
         # Show the menu again to get multiple selections
         self.menu.exec_()

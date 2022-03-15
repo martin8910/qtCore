@@ -39,6 +39,16 @@ def get_value(object, static=False):
             #    value = value[0]
             #else:
             #    value = value
+    elif "pathButton" in str(type(object)):  #PathButton
+        value = object.get_value()
+        # # Return the first instance if multiple is false
+        # if object.multiple is False:
+        #     try: value = value[0]
+        #     except: value = value
+        #     #if type(value) is not None:
+        #     #    value = value[0]
+        #     #else:
+        #     #    value = value
     elif "vectorInput" in str(type(object)):  #ValueButton
         value = object.get_values()
     elif "colorInput" in str(type(object)):  #ValueButton
@@ -62,6 +72,7 @@ def get_value(object, static=False):
     elif type(object) == QtWidgets.QCheckBox:  #QCheckBox
         value = object.isChecked()
     elif type(object) == QtWidgets.QComboBox:  #QComboBox
+        #value = object.currentText()
         value = object.currentText()
     else:
         print("GET VALUE: No supported type found for '{}'".format(type(object)))
