@@ -373,6 +373,10 @@ class attribute_holder(QtWidgets.QWidget):
                     input_attr = pm.listAttr(x, keyable=True, visible=True, locked=False)
                     output_attr = pm.listAttr(x, output=True, readOnly=True)
                     attribute_lists.append(input_attr + output_attr)
+                elif "deformer" in classifications:
+                    input_attr = pm.listAttr(x, keyable=True, visible=True, locked=False)
+                    output_attr = pm.listAttr(x, output=True, readOnly=True)
+                    attribute_lists.append(input_attr + output_attr)
                 else:
                     attribute_lists.append(pm.listAttr(x, keyable=True, visible=True, locked=False, shortNames=False))
 
