@@ -701,6 +701,9 @@ class dict_holder(QtWidgets.QWidget):
         self.add_button.setObjectName("small_button")
         self.add_button.clicked.connect(self.add_item)
 
+        self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+
+
         # Create layout
         self.topLayout = QtWidgets.QVBoxLayout()
         self.topLayout.setContentsMargins(5, 0, 5, 0)
@@ -729,10 +732,10 @@ class dict_holder(QtWidgets.QWidget):
         self.tableWidget = QtWidgets.QTableWidget()
         self.tableWidget.itemSelectionChanged.connect(self.update_buttons)
         self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.tableWidget.setShowGrid(True)
+        #self.tableWidget.setShowGrid(True)
         self.tableWidget.verticalHeader().setMinimumSectionSize(30)
         self.tableWidget.setCornerWidget(None)
-        self.tableWidget.setAlternatingRowColors(True)
+        #self.tableWidget.setAlternatingRowColors(True)
         self.tableWidget.currentCellChanged.connect(self.update_values)
         self.tableWidget.setTabKeyNavigation(False)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -859,8 +862,8 @@ class dict_holder(QtWidgets.QWidget):
 
         self.update_layout()
 
-        print("Updating Dict Values")
-        print(self.value)
+        #print("Updating Dict Values")
+        #print(self.value)
 
     def update_layout(self):
         vertHeader = self.tableWidget.verticalHeader()
@@ -965,7 +968,6 @@ class dict_holder(QtWidgets.QWidget):
                     elif type == "objectAttribute":
                         widget = attribute_holder()
                         widget.emitter.value.connect(self.update_layout)
-                        widget.emitter.value.connect(self.update_values)
                         widget.set_multiple(multiple_list[row])
                         #multiple_list
                     elif type == "objectMultiple":
@@ -981,6 +983,10 @@ class dict_holder(QtWidgets.QWidget):
                     # Set value from data
                     if value[row] is not None:
                         main.set_value(widget, value[row])
+
+                    # Do extra connections after value is set
+                    if type == "objectAttribute":
+                        widget.emitter.value.connect(self.update_values)
 
                     # Set update
                     main.connect_value_change(widget, connection=(self.update_values))
