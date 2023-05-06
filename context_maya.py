@@ -14,6 +14,7 @@ from .button import valueButton, fadeButton
 from .icon import svg_icon
 from .dialog import inputDialog
 
+
 if sys.version_info >= (3, ):
     # Python 3 compatibility
     long = int
@@ -222,11 +223,24 @@ def Dock(Widget, width=300, show=True, label=None):
         )
     return child
 
+#
+
+
 def get_window():
     '''Return the main maya-window as an instance to parent to'''
     window = OpenMayaUI.MQtUtil.mainWindow()
-    mayaWindow = shiboken.wrapInstance( long( window ), QtWidgets.QMainWindow)
+    #mayaWindow = shiboken.wrapInstance( long( window ), QtWidgets.QMainWindow)
+    mayaWindow = shiboken.wrapInstance(long(OpenMayaUI.MQtUtil.mainWindow()), QtWidgets.QMainWindow)
     return mayaWindow
+
+# def get_window():
+#     '''Return the main maya-window as an instance to parent to'''
+#     mayaWindow = getMayaWindow()
+#     if not mayaWindow:
+#         return None
+#     mainWindowPtr = OpenMayaUI.MQtUtil.mainWindow()
+#     mainWindow = wrapInstance(long(mainWindowPtr), QtWidgets.QMainWindow)
+#     return mainWindow
 
 class generic_dockable_window(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     def __init__(self, interfacePath, parent=None):
@@ -817,6 +831,7 @@ class dict_holder(QtWidgets.QWidget):
 
     def get_values(self):
         data = []
+        # Use a list comprehension to create a list of types from the rows variable
         type_list = [x.type for x in self.rows]
         for index in range(self.tableWidget.rowCount()):
             values = []
@@ -825,14 +840,16 @@ class dict_holder(QtWidgets.QWidget):
                 item = self.tableWidget.cellWidget(index, row)
                 # Get value from item
                 if type(item) != None:
+                    # Use the main.get_value() function to get the value from the item
                     value = main.get_value(item, static=True)
                     values.append(value)
                 else:
                     print("Problem getting value from:", index, row)
 
-            # Combind values with titles
+            # Use a list comprehension to create a list of titles from the rows variable
             title_list = [x.title for x in self.rows]
 
+            # Use the zip() function to combine the list of titles with the list of values
             dictionary = dict(zip(title_list, values))
 
             data.append(dictionary)
@@ -886,64 +903,89 @@ class dict_holder(QtWidgets.QWidget):
         #horHeader = self.tableWidget.horizontalHeader()
         horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         #horHeader.setCascadingSectionResizes(True)
+
     def add_layout_items(self):
-        '''Add items to the object based on current data'''
+        # Only run if rows are defined
         if self.rows is None:
-            pass
-        else:
-            title_list = [x.title for x in self.rows]
-            options_list = [x.options for x in self.rows]
-            defaultValue_list = [x.defaultValue for x in self.rows]
-            multiple_list = [x.multiple for x in self.rows]
-            type_list = [x.type for x in self.rows]
+            return
 
-            item_value_list = [[item[title] for title in title_list] for item in self.value]
-            self.tableWidget.setColumnCount(len(title_list))
-            self.tableWidget.setHorizontalHeaderLabels(title_list)
+        # Create lists of data from the rows
+        title_list = [x.title for x in self.rows]
+        options_list = [x.options for x in self.rows]
+        defaultValue_list = [x.defaultValue for x in self.rows]
+        multiple_list = [x.multiple for x in self.rows]
+        type_list = [x.type for x in self.rows]
 
-            # Disable updates
-            self.tableWidget.setUpdatesEnabled(False)
-            self.tableWidget.blockSignals(True)
+        # Create a list of values for each item
+        item_value_list = [[item[title] for title in title_list] for item in self.value]
 
-            # Load data
-            self.tableWidget.setRowCount(len(item_value_list))
-            row_widgets = []
-            for index, value in enumerate(item_value_list):
-                # For every header
-                widgets = []
-                for row, type in enumerate(type_list):
-                    # Create item holder
+        # Set the number of columns in the table
+        self.tableWidget.setColumnCount(len(title_list))
+
+        # Set the table headers
+        self.tableWidget.setHorizontalHeaderLabels(title_list)
+
+        # Disable updates to make the process faster
+        self.tableWidget.setUpdatesEnabled(False)
+        self.tableWidget.blockSignals(True)
+
+        # Set the number of rows in the table
+        self.tableWidget.setRowCount(len(item_value_list))
+
+        # Create a list to hold the row widgets
+        row_widgets = []
+
+        widget_classes = {
+            "str": QtWidgets.QLineEdit,
+            "float": QtWidgets.QDoubleSpinBox,
+            "int": QtWidgets.QSpinBox,
+            "selectSingle": QtWidgets.QComboBox,
+            "selectMultiple": floating_combobox_multiple,
+            "bool": QtWidgets.QCheckBox,
+            "vector": main.vectorInput,
+            "color": main.colorInput,
+            "objectSingle": valueButton,
+            "objectAttribute": attribute_holder,
+            "objectMultiple": valueButton,
+        }
+
+        # Iterate over the rows to create the widgets
+        for index, value in enumerate(item_value_list):
+            # Create a list to hold the widgets for this row
+            widgets = []
+
+            # For each row and type
+            for row, type in enumerate(type_list):
+                # Look up the widget class in the dictionary using the type variable
+                widget_class = widget_classes.get(type)
+                if widget_class:
+                    # Create an instance of the widget class
+                    widget = widget_class()
                     item = QtWidgets.QTableWidgetItem()
                     self.tableWidget.setItem(index, row, item)
-                    # Create based on type
+                    # Set widget properties based on the type
                     if type == "str":
-                        widget = QtWidgets.QLineEdit("")
-                        #widget.setText("")
                         widget.setStyleSheet("selection-background-color: rgb(0,250,250,150)")
                         if defaultValue_list[row] is not None:
                             widget.setText(defaultValue_list[row])
                     elif type == "float":
-                        widget =  QtWidgets.QDoubleSpinBox()
-                        widget.setMaximum(99999)
-                        widget.setMinimum(-99999)
-                        widget.setSingleStep(0.01)
-                        widget.setDecimals(3)
-                        if defaultValue_list[row] is not None:
-                            widget.setValue(defaultValue_list[row])
+                            widget.setMaximum(99999)
+                            widget.setMinimum(-99999)
+                            widget.setSingleStep(0.01)
+                            widget.setDecimals(3)
+                            if defaultValue_list[row] is not None:
+                                widget.setValue(defaultValue_list[row])
                     elif type == "int":
-                        widget = QtWidgets.QSpinBox()
                         widget.setMaximum(99999)
                         widget.setMinimum(-99999)
                         if defaultValue_list[row] is not None:
                             widget.setValue(defaultValue_list[row])
                     elif type == "selectSingle":
-                        widget = QtWidgets.QComboBox()
                         # Add options
                         widget.addItems([str(option) for option in options_list[row]])
                         if defaultValue_list[row] is not None:
                             widget.setCurrentText(defaultValue_list[row])
                     elif type == "selectMultiple":
-                        widget = floating_combobox_multiple(self)
                         #widget = combobox_multiple()
                         widget.emitter.value.connect(self.update_layout)
                         widget.menu.triggered.connect(self.update_layout)
@@ -951,27 +993,19 @@ class dict_holder(QtWidgets.QWidget):
                         if defaultValue_list[row] is not None:
                             widget.set_value(defaultValue_list[row])
                     elif type == "bool":
-                        widget = QtWidgets.QCheckBox()
                         if defaultValue_list[row] is not None:
                             widget.setChecked(defaultValue_list[row])
                         # Add in labels for on/off using the options list
                         #widget.setText(options_list[row][1])
-                    elif type == "vector":
-                        widget = main.vectorInput()
-                    elif type == "color":
-                        widget = main.colorInput()
                     elif type == "objectSingle":
-                        widget = valueButton()
                         #widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
                         widget.multiple = False
                         widget.set_text("Add Object")
                     elif type == "objectAttribute":
-                        widget = attribute_holder()
                         widget.emitter.value.connect(self.update_layout)
                         widget.set_multiple(multiple_list[row])
                         #multiple_list
                     elif type == "objectMultiple":
-                        widget = valueButton()
                         widget.set_text("Add Object(s)")
                     else:
                         print("Type not supported")
