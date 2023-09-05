@@ -836,12 +836,15 @@ class dict_holder(QtWidgets.QWidget):
         for index in range(self.tableWidget.rowCount()):
             values = []
 
+            print("GETTING DICT VALUES:")
             for row in xrange(len(self.rows)):
                 item = self.tableWidget.cellWidget(index, row)
+                print(item)
                 # Get value from item
                 if type(item) != None:
                     # Use the main.get_value() function to get the value from the item
                     value = main.get_value(item, static=True)
+                    print("Value:", value)
                     values.append(value)
                 else:
                     print("Problem getting value from:", index, row)

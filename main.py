@@ -25,57 +25,53 @@ def qtUiLoader(uifile, widget=None):
 def get_value(object, static=False):
     '''Get the current value from a input field, numeric slider etc'''
     # Get type
-    if type(object) == QtWidgets.QLineEdit:  #QLineEdit
+    object_type = type(object)
+    #object_type_str = str(object_type)
+    object_type_str = object.__class__.__name__
+
+    print("TYPE:", object_type_str)
+
+    if object_type == QtWidgets.QLineEdit:  # QLineEdit
         value = object.text()
-    elif type(object) == QtWidgets.QTextEdit:  #QTextEdit
+    elif object_type == QtWidgets.QTextEdit:  # QTextEdit
         value = object.toPlainText()
-    elif "valueButton" in str(type(object)):  #ValueButton
+    elif "valueButton" in object_type_str:  # ValueButton
         value = object.get_value(static=static)
-        # Return the first instance if multiple is false
+        # Return the first instance if multiple is False
         if object.multiple is False:
-            try: value = value[0]
-            except: value = value
-            #if type(value) is not None:
-            #    value = value[0]
-            #else:
-            #    value = value
-    elif "pathButton" in str(type(object)):  #PathButton
+            try:
+                value = value[0]
+            except (TypeError, IndexError):  # Assuming these are the exceptions you want to handle
+                pass
+        print("valueButton value:", value)
+    elif "pathButton" in object_type_str:  # PathButton
         value = object.get_value()
-        # # Return the first instance if multiple is false
-        # if object.multiple is False:
-        #     try: value = value[0]
-        #     except: value = value
-        #     #if type(value) is not None:
-        #     #    value = value[0]
-        #     #else:
-        #     #    value = value
-    elif "vectorInput" in str(type(object)):  #ValueButton
+    elif "vectorInput" in object_type_str:  # VectorInput
         value = object.get_values()
-    elif "colorInput" in str(type(object)):  #ValueButton
+    elif "colorInput" in object_type_str:  # ColorInput
         value = object.get_values()
-    elif "pymel_holder" in str(type(object)):  #Pymel holder
+    elif "pymel_holder" in object_type_str:  # Pymel holder
         value = object.get_value()
-    elif "dict_holder" in str(type(object)):  #Dictionary Holder
+    elif "dict_holder" in object_type_str:  # Dictionary Holder
         value = object.get_values()
-    elif "floating_combobox_multiple" in str(type(object)):  #ValueButton
+    elif "floating_combobox_multiple" in object_type_str:  # FloatingComboBoxMultiple
         value = object.get_value()
-    elif "combobox_multiple" in str(type(object)):  #ValueButton
+    elif "combobox_multiple" in object_type_str:  # ComboBoxMultiple
         value = object.get_value()
-    elif "attribute_holder" in str(type(object)):  #Combobox Multiple
+    elif "attribute_holder" in object_type_str:  # AttributeHolder
         value = object.get_value()
-    elif type(object) == QtWidgets.QLabel:  #Label
+    elif object_type == QtWidgets.QLabel:  # QLabel
         value = None
-    elif type(object) == QtWidgets.QSpinBox:  #QSpineBox
+    elif object_type == QtWidgets.QSpinBox:  # QSpinBox
         value = object.value()
-    elif type(object) == QtWidgets.QDoubleSpinBox:  #QDoubleSpinBox
+    elif object_type == QtWidgets.QDoubleSpinBox:  # QDoubleSpinBox
         value = object.value()
-    elif type(object) == QtWidgets.QCheckBox:  #QCheckBox
+    elif object_type == QtWidgets.QCheckBox:  # QCheckBox
         value = object.isChecked()
-    elif type(object) == QtWidgets.QComboBox:  #QComboBox
-        #value = object.currentText()
+    elif object_type == QtWidgets.QComboBox:  # QComboBox
         value = object.currentText()
     else:
-        print("GET VALUE: No supported type found for '{}'".format(type(object)))
+        print("GET VALUE: No supported type found for '{}'".format(object_type))
         value = None
 
     return value

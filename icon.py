@@ -30,25 +30,26 @@ def load_svg_pixmap(iconPath, size=(20,20), assign_rgb=False):
 
     return pixmap
 
+
 def svg_icon(button=None, path=None, assign_rgb=False):
     '''Load a svg icon onto a button respecting its size'''
-    if type(button) == QtWidgets.QPushButton:
+
+    button_type = button.__class__.__name__
+
+    if button_type in ["QPushButton", "QToolButton", "fadeButton", "popButton"]:
         size = (button.iconSize().width(), button.iconSize().height())
-    elif "fadeButton" in str(type(button)) or "popButton" in str(type(button)):
-        size = (button.iconSize().width(), button.iconSize().height())
-    elif type(button) == QtWidgets.QToolButton:
-        size = (button.iconSize().width(), button.iconSize().height())
-    elif type(button) == QtWidgets.QAction:
-        # Unsorted variable for now
+    elif button_type == "QAction":
         size = (50, 50)
-    elif type(button) == QtWidgets.QLabel:
+    elif button_type == "QLabel":
         size = (button.width(), button.height())
     else:
         try:
             size = (button.iconSize().width(), button.iconSize().height())
-        except:
-            print("Unsupported type:", type(button))
-            size = (50,50)
+        except AttributeError:
+            print("Unsupported type for icon:", button_type)
+            size = (50, 50)
+
+    return size  # I've added a return here so you can get the size from the function
 
     # Create pixmap from path
     svg_pixmap = load_svg_pixmap(path, size=size, assign_rgb=assign_rgb)

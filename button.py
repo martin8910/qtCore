@@ -180,6 +180,9 @@ class valueButton(QtWidgets.QToolButton):
         self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.add_menu_items()
 
+    def __repr__(self):
+        return 'valueButton'
+
     def add_menu_items(self):
         items = []
         items.append(["Select Objects", self.select_value])
@@ -190,6 +193,7 @@ class valueButton(QtWidgets.QToolButton):
         items.append(["Reset Values", self.reset_value])
         if self.missing_value:
             items.append(["Remove missing", self.remove_missing_values])
+        items.append(["Print info", self.print_info])
 
 
         if len(self.menu_items) != 0:
@@ -210,7 +214,7 @@ class valueButton(QtWidgets.QToolButton):
             for object in selection:
                 valueName = object.name()
                 if valueName not in current_values:
-                    if type(current_values[0]) == str or type(current_values[0]) == unicode:
+                    if type(current_values[0]) == str or type(current_values[0]) == str:
                         self.value.append(object.name())
                     else:
                         self.value.append(object)
@@ -221,6 +225,12 @@ class valueButton(QtWidgets.QToolButton):
         else:
             print("WARNING: No selection to add from!")
 
+    def print_info(self):
+        print("Multiple:", self.multiple)
+        print("Missing value:", self.missing_value)
+        print("Original Title:", self.originalTitle)
+        print("Static Value:", self.static_value)
+        print("Value:", self.value)
     def remove_selected_from_menu(self):
         print("This will remove existing items")
 
@@ -231,7 +241,7 @@ class valueButton(QtWidgets.QToolButton):
             for object in selection:
                 valueName = object.name()
                 if valueName in current_values:
-                    if type(current_values[0]) == str or type(current_values[0]) == unicode:
+                    if type(current_values[0]) == str or type(current_values[0]) == str:
                         self.value.remove(object.name())
                     else:
                         self.value.remove(object)
@@ -320,13 +330,13 @@ class valueButton(QtWidgets.QToolButton):
 
         # Set Static values
         if len(value) is not 0:
-            if type(value[0]) == str or type(value[0]) == unicode:
+            if isinstance(value[0], str):
                 self.static_value = value
             else:
-                self.static_value = [v.name() for v in value]
+                try: self.static_value = [v.name() for v in value]
+                except: self.static_value = [v for v in value]
         else:
             self.static_value = None
-
 
         self.set_header(valueName=None, animate=animate)
 
@@ -345,12 +355,13 @@ class valueButton(QtWidgets.QToolButton):
                 if type(value) == list or type(value) == tuple:
                     # If length is not 0
                     if len(value) != 0:
-                        # If first list-item is unicode
-                        if type(value[0]) == str or type(value[0]) == unicode:
+                        # If first list-item is str
+                        if isinstance(value[0], str):
                             valueName = [object for object in value]
                         # If first list-item is object
                         else:
-                            valueName = [object.name() for object in value]
+                            try: valueName = [object.name() for object in value]
+                            except: valueName = [object for object in value]
 
                         valueName = ",".join(valueName)[:20]
                         static_value = valueName
@@ -358,8 +369,8 @@ class valueButton(QtWidgets.QToolButton):
                         valueName = "Nothing selected..."
                 # Not a list
                 else:
-                    # If unicode
-                    if type(value) == str or type(value) == unicode:
+                    # If str
+                    if type(value) == str or type(value) == str:
                         valueName = value
                     # If Pymel
                     else:

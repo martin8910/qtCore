@@ -14,8 +14,8 @@ def fadeAnimation(start=0, end=1, duration=300, object=None, finishAction=None):
         style = QtCore.QEasingCurve()
         style.setType(QtCore.QEasingCurve.OutQuint)
 
-        if start is "current": start = object.opacity()
-        if end is "current": end = object.opacity()
+        if start == "current": start = object.opacity()
+        if end == "current": end = object.opacity()
 
         # Animate window opasity
         opasicyAnimation = QtCore.QPropertyAnimation(object, b"opacity", object)
@@ -226,7 +226,7 @@ def animateWidgetSize(element, start=(300, 100), end=(300, 150),expanding=False,
             # pass
 
         # Create animation property and set start and end point
-        animation = QtCore.QPropertyAnimation(element, attribute, element)
+        animation = QtCore.QPropertyAnimation(element, QtCore.QByteArray(attribute.encode("utf-8")), element)
 
         # Set start and end values
         animation.setStartValue(QtCore.QSize(start[0], start[1]))
