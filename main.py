@@ -29,8 +29,6 @@ def get_value(object, static=False):
     #object_type_str = str(object_type)
     object_type_str = object.__class__.__name__
 
-    print("TYPE:", object_type_str)
-
     if object_type == QtWidgets.QLineEdit:  # QLineEdit
         value = object.text()
     elif object_type == QtWidgets.QTextEdit:  # QTextEdit
@@ -43,7 +41,6 @@ def get_value(object, static=False):
                 value = value[0]
             except (TypeError, IndexError):  # Assuming these are the exceptions you want to handle
                 pass
-        print("valueButton value:", value)
     elif "pathButton" in object_type_str:  # PathButton
         value = object.get_value()
     elif "vectorInput" in object_type_str:  # VectorInput
@@ -384,6 +381,7 @@ class colorInput(QtWidgets.QWidget):
         self.adjustSize()
 
         self.update_values()
+
 
 
     def get_values(self):

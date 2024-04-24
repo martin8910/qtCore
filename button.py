@@ -254,7 +254,6 @@ class valueButton(QtWidgets.QToolButton):
         # Get current selection
         return_value = False
         current_values = self.get_value(static=False)
-        print("current_values:", current_values)
         if current_values:
             selection = pm.ls(sl=True)
             if len(selection) >= 1:

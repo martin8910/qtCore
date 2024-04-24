@@ -11,7 +11,7 @@ from .external.Qt import QtWidgets, QtCompat, QtCore, QtGui, QtSvg
 ###################################################################################################
 def get_children_from_treeWidgetItem(treeWidgetItem):
     '''Return all items from a qTreeWidgetItem'''
-    items = [treeWidgetItem.child(number) for number in xrange(treeWidgetItem.childCount())]
+    items = [treeWidgetItem.child(number) for number in range(treeWidgetItem.childCount())]
 
     return items
 
