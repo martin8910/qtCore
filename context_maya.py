@@ -932,9 +932,6 @@ class dict_holder(QtWidgets.QWidget):
         # Set the number of rows in the table
         self.tableWidget.setRowCount(len(item_value_list))
 
-        # Create a list to hold the row widgets
-        row_widgets = []
-
         widget_classes = {
             "str": QtWidgets.QLineEdit,
             "float": QtWidgets.QDoubleSpinBox,
@@ -951,46 +948,31 @@ class dict_holder(QtWidgets.QWidget):
 
         # Iterate over the rows to create the widgets
         for index, value in enumerate(item_value_list):
-            # Create a list to hold the widgets for this row
-            widgets = []
-
-            # For each row and type
             for row, type in enumerate(type_list):
-                # Look up the widget class in the dictionary using the type variable
                 widget_class = widget_classes.get(type)
                 if widget_class:
-                    # Create an instance of the widget class
                     widget = widget_class()
-                    item = QtWidgets.QTableWidgetItem()
-                    self.tableWidget.setItem(index, row, item)
-                    # Set widget properties based on the type
                     if type == "str":
                         widget.setStyleSheet("selection-background-color: rgb(0,250,250,150)")
                         if defaultValue_list[row] is not None:
                             widget.setText(defaultValue_list[row])
                     elif type == "float":
-                            widget.setMaximum(99999)
-                            widget.setMinimum(-99999)
-                            widget.setSingleStep(0.01)
-                            widget.setDecimals(3)
-                            if defaultValue_list[row] is not None:
-                                widget.setValue(defaultValue_list[row])
+                        widget.setMaximum(99999)
+                        widget.setMinimum(-99999)
+                        widget.setSingleStep(0.01)
+                        widget.setDecimals(3)
+                        if defaultValue_list[row] is not None:
+                            widget.setValue(defaultValue_list[row])
                     elif type == "int":
                         widget.setMaximum(99999)
                         widget.setMinimum(-99999)
                         if defaultValue_list[row] is not None:
                             widget.setValue(defaultValue_list[row])
                     elif type == "selectSingle":
-                        # Add options
                         widget.addItems([str(option) for option in options_list[row]])
                         if defaultValue_list[row] is not None:
                             widget.setCurrentText(defaultValue_list[row])
-                    elif type == "color":
-                        pass
-                    elif type == "vector":
-                        pass
                     elif type == "selectMultiple":
-                        #widget = combobox_multiple()
                         widget.emitter.value.connect(self.update_layout)
                         widget.menu.triggered.connect(self.update_layout)
                         widget.set_options(options_list[row])
@@ -999,51 +981,40 @@ class dict_holder(QtWidgets.QWidget):
                     elif type == "bool":
                         if defaultValue_list[row] is not None:
                             widget.setChecked(defaultValue_list[row])
-                        # Add in labels for on/off using the options list
-                        #widget.setText(options_list[row][1])
                     elif type == "objectSingle":
-                        #widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
                         widget.multiple = False
                         widget.set_text("Add Object")
                     elif type == "objectAttribute":
                         widget.emitter.value.connect(self.update_layout)
                         widget.set_multiple(multiple_list[row])
-                        #multiple_list
                     elif type == "objectMultiple":
                         widget.set_text("Add Object(s)")
-                    else:
-                        print("Type not supported")
-                        widget = QtWidgets.QPushButton("?")
-                    # Add to table
-                    self.tableWidget.setCellWidget(index, row, widget)
-                    widgets.append(widget)
 
-                    # Set value from data
+                    item = QtWidgets.QTableWidgetItem()
+                    self.tableWidget.setItem(index, row, item)
+                    self.tableWidget.setCellWidget(index, row, widget)
+
                     if value[row] is not None:
                         main.set_value(widget, value[row])
 
-                    # Do extra connections after value is set
                     if type == "objectAttribute":
                         widget.emitter.value.connect(self.update_values)
 
-                    # Set update
                     main.connect_value_change(widget, connection=(self.update_values))
 
-                row_widgets.append(widgets)
+        # Update table layout
+        self.tableWidget.resizeColumnsToContents()
+        vertHeader = self.tableWidget.verticalHeader()
+        horHeader = self.tableWidget.horizontalHeader()
+        margin = self.tableWidget.getContentsMargins()
+        height_sum = (vertHeader.length() + margin[0]) + horHeader.height() + margin[0]
+        self.tableWidget.setMaximumHeight(height_sum)
+        self.tableWidget.setMinimumHeight(height_sum)
+        horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
-
-
-            # Set tab behavior by row instead of column
-            if len(row_widgets) >= 2:
-                for item in zip(*row_widgets):
-                    for number, x in enumerate(item):
-                        self.tableWidget.setTabOrder(item[number - 1], x)  # c to d
-
-            self.update_layout()
-
-            # Disable updates
-            self.tableWidget.setUpdatesEnabled(True)
-            self.tableWidget.blockSignals(False)
+        # Enable updates
+        self.tableWidget.setUpdatesEnabled(True)
+        self.tableWidget.blockSignals(False)
 
 
 class communicate(Qt.QtCore.QObject):
