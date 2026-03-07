@@ -662,274 +662,280 @@ class pymel_holder(QtWidgets.QWidget):
 
 
 
+import os, copy
+from Qt import QtCore, QtWidgets
+
 class dict_holder(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(dict_holder, self).__init__(parent)
-        item_list = []
-        self.value = None
-        self.multiple_mode = True
 
-        # Create communication slot
+        # --- data ---
+        self.value = []                 # committed data (only after Save)
+        self._working_rows = []         # live UI data (unsaved)
+        self._dirty = False             # unsaved changes?
+        self._building = False          # guard while rebuilding UI
+        self.multiple_mode = True
+        self.rows = None                # column schema
+
+        # --- comms ---
         self.emitter = communicate(self)
 
-
-        # Load Global Stylesheet
+        # --- style (keep yours if you had one) ---
         stylesheet_path = relativePath + "stylesheets" + os.sep + "context_maya.css"
-        with open(stylesheet_path, "r") as sheet:
-            self.setStyleSheet(sheet.read())
+        if os.path.exists(stylesheet_path):
+            with open(stylesheet_path, "r") as sheet:
+                self.setStyleSheet(sheet.read())
 
-
-        # Title card
-        self.title = QtWidgets.QLabel("Dict Holder Title")
+        # --- header controls ---
+        self.title = QtWidgets.QLabel("Dict Holder")
         self.title.setStyleSheet("color: rgb(250,250,250);")
-        item_list.append(self.title)
 
-        item_list.append(main.create_spacer(mode="vertical"))
+        self.save_button = QtWidgets.QPushButton("💾 Save Changes")
+        self.save_button.setObjectName("small_button")
+        self.save_button.clicked.connect(self.save_changes)
+        self.save_button.setEnabled(False)
 
-        # Remove button
-        self.remove_button = QtWidgets.QPushButton("Remove", self)
-        item_list.append(self.remove_button)
+        self.status_label = QtWidgets.QLabel("All changes saved")
+        self.status_label.setStyleSheet("color: rgb(120,200,120);")
+
+        self.remove_button = QtWidgets.QPushButton("❌ Remove")
         self.remove_button.setObjectName("small_button")
         self.remove_button.clicked.connect(self.remove_item)
         self.remove_button.setHidden(True)
 
-
-        # Insert button
-        self.insert_button = QtWidgets.QPushButton("Insert", self)
-        item_list.append(self.insert_button)
+        self.insert_button = QtWidgets.QPushButton("Insert")
         self.insert_button.setObjectName("small_button")
         self.insert_button.clicked.connect(self.insert_item)
         self.insert_button.setHidden(True)
 
-        # Duplicate button
-        self.dup_button = QtWidgets.QPushButton("Duplicate", self)
-        item_list.append(self.dup_button)
+        self.dup_button = QtWidgets.QPushButton("Duplicate")
         self.dup_button.setObjectName("small_button")
         self.dup_button.clicked.connect(self.duplicate_item)
         self.dup_button.setHidden(True)
 
-
-        # Main add item button
-        self.add_button = QtWidgets.QPushButton("+ Add Item", self)
-        item_list.append(self.add_button)
+        self.add_button = QtWidgets.QPushButton("➕ Add Item")
         self.add_button.setObjectName("small_button")
         self.add_button.clicked.connect(self.add_item)
 
-        self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        # --- header layout ---
+        header = QtWidgets.QWidget()
+        h = QtWidgets.QHBoxLayout(header)
+        h.setContentsMargins(2, 2, 2, 2)
+        h.setSpacing(6)
+        h.addWidget(self.title)
+        h.addStretch(1)
+        h.addWidget(self.status_label)
+        h.addWidget(self.save_button)
+        h.addSpacing(8)
+        h.addWidget(self.remove_button)
+        h.addWidget(self.insert_button)
+        h.addWidget(self.dup_button)
+        h.addWidget(self.add_button)
 
+        # --- table ---
+        self.tableWidget = QtWidgets.QTableWidget()
+        self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget.verticalHeader().setMinimumSectionSize(30)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.setStyleSheet("selection-background-color: rgba(250,250,250,10)")
+        self.tableWidget.itemSelectionChanged.connect(self._update_row_buttons)
 
-        # Create layout
-        self.topLayout = QtWidgets.QVBoxLayout()
+        # Enable moving rows by dragging the header (doesn’t auto-save)
+        vh = self.tableWidget.verticalHeader()
+        vh.setSectionsMovable(True)
+        vh.sectionMoved.connect(self._on_row_reordered)
+
+        # --- top layout ---
+        self.topLayout = QtWidgets.QVBoxLayout(self)
         self.topLayout.setContentsMargins(5, 0, 5, 0)
         self.topLayout.setSpacing(5)
-        self.topLayout.setAlignment(QtCore.Qt.AlignTop)
-
-        # Create main widget
-        widget = QtWidgets.QWidget()
-        #widget.setStyleSheet("background-color: rgb(0,250,0)")
-        layout = QtWidgets.QHBoxLayout()
-        layout.setSpacing(3)
-        #layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        layout.setContentsMargins(2,2, 2, 2)
-        widget.setLayout(layout)
-        widget.setMinimumHeight(25)
-        widget.setMaximumHeight(25)
-        self.topLayout.addWidget(widget)
-
-        #spacer = main.create_spacer(mode="vertical")
-        #layout.addItem(spacer)
-
-        # Add buttons to layout
-        main.add_items_to_layout(layout, item_list)
-
-        # Create table
-        self.tableWidget = QtWidgets.QTableWidget()
-        self.tableWidget.itemSelectionChanged.connect(self.update_buttons)
-        self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        #self.tableWidget.setShowGrid(True)
-        self.tableWidget.verticalHeader().setMinimumSectionSize(30)
-        self.tableWidget.setCornerWidget(None)
-        #self.tableWidget.setAlternatingRowColors(True)
-        self.tableWidget.currentCellChanged.connect(self.update_values)
-        self.tableWidget.setTabKeyNavigation(False)
-        self.tableWidget.horizontalHeader().setStretchLastSection(True)
-        self.tableWidget.setStyleSheet("selection-background-color: rgb(250,250,250,10)")
-
+        self.topLayout.addWidget(header)
         self.topLayout.addWidget(self.tableWidget)
 
-
-        # Set main layout
-        self.setLayout(self.topLayout)
-
-        self.rows = None
+    # ------------------ public API ------------------
 
     def set_title(self, title):
         self.title.setText(title)
 
-    def dropEvent(self, event):
+    def set_value(self, in_value, animate=True):
+        """Load committed data and reset working copy + UI."""
+        self.value = copy.deepcopy(in_value or [])
+        self._working_rows = copy.deepcopy(self.value)
+        self._set_dirty(False)
+        self.add_layout_items()
+
+    # ------------------ save / dirty ------------------
+
+    def save_changes(self):
+        """Commit the table into self.value and broadcast."""
+        self._squash_working_from_table()
+        self.value = copy.deepcopy(self._working_rows)
+        self._set_dirty(False)
         self.emitter.value.emit(1)
 
+    def _mark_dirty(self, *args, **kwargs):
+        if self._building:
+            return
+        self._set_dirty(True)
+
+    def _set_dirty(self, dirty):
+        self._dirty = bool(dirty)
+        if self._dirty:
+            self.status_label.setText("Unsaved changes")
+            self.status_label.setStyleSheet("color: rgb(255,200,0);")
+            self.save_button.setEnabled(True)
+        else:
+            self.status_label.setText("All changes saved")
+            self.status_label.setStyleSheet("color: rgb(120,200,120);")
+            self.save_button.setEnabled(False)
+
+    # ------------------ row operations (work on working copy) ------------------
 
     def add_item(self):
-        '''Add a empty value from the button'''
-
-        if self.value is not None:
-            item = {key.title: None for key in self.rows}
-            self.value.append(item)
-
+        if self.rows is None:
+            return
+        self._squash_working_from_table()
+        new_item = {key.title: None for key in self.rows}
+        self._working_rows.append(new_item)
+        self._set_dirty(True)
         self.add_layout_items()
-
-        # Emit signal so other uis connected to this will get updated
-        self.emitter.value.emit(1)
 
     def insert_item(self):
-        '''Insert an item after the selected one'''
-
-        # Get current index
-        selected_index = self.tableWidget.currentRow()
-        if self.value is not None:
-            item = {key.title: None for key in self.rows}
-            self.value.insert(selected_index + 1, item)
-
+        if self.rows is None or self.tableWidget.rowCount() == 0:
+            return
+        self._squash_working_from_table()
+        lr = self.tableWidget.currentRow()
+        if lr < 0:
+            return
+        vr = self.tableWidget.verticalHeader().visualIndex(lr)
+        item = {key.title: None for key in self.rows}
+        self._working_rows.insert(vr + 1, item)
+        self._set_dirty(True)
         self.add_layout_items()
-
-        # Emit signal so other uis connected to this will get updated
-        self.emitter.value.emit(1)
 
     def duplicate_item(self):
-        '''Duplicate an item after the selected one'''
-
-        # Get current index
-        selected_index = self.tableWidget.currentRow()
-        if self.value is not None:
-            item = self.value[selected_index]
-            self.value.insert(selected_index + 1, item)
-
-        self.add_layout_items()
-
-        # Emit signal so other uis connected to this will get updated
-        self.emitter.value.emit(1)
-
-    def set_value(self, in_value, animate=True):
-
-        self.value = in_value
-
-        self.add_layout_items()
+        if self.rows is None or self.tableWidget.rowCount() == 0:
+            return
+        self._squash_working_from_table()
+        lr = self.tableWidget.currentRow()
+        if lr < 0:
+            return
+        vr = self.tableWidget.verticalHeader().visualIndex(lr)
+        if 0 <= vr < len(self._working_rows):
+            self._working_rows.insert(vr + 1, copy.deepcopy(self._working_rows[vr]))
+            self._set_dirty(True)
+            self.add_layout_items()
 
     def remove_item(self):
-        '''Remove a item from the list'''
+        if self.tableWidget.rowCount() == 0:
+            return
+        self._squash_working_from_table()
+        lr = self.tableWidget.currentRow()
+        if lr < 0:
+            return
+        vr = self.tableWidget.verticalHeader().visualIndex(lr)
+        if 0 <= vr < len(self._working_rows):
+            del self._working_rows[vr]
+            self._set_dirty(True)
+            self.add_layout_items()
 
-        selected_index = self.tableWidget.currentRow()
+    # ------------------ table <-> data helpers ------------------
 
-        # Remove value
-        del self.value[selected_index]
+    def _on_row_reordered(self, logical, oldVisual, newVisual):
+        """Dragging a row doesn’t save; it only marks dirty and updates working order."""
+        self._squash_working_from_table()  # reflect the new visual order
+        self._set_dirty(True)
 
-        self.tableWidget.removeRow(selected_index)
-
-        # Trigger update
-        self.emitter.value.emit(1)
+    def _squash_working_from_table(self):
+        """Read the table (visual order) into the working copy."""
+        self._working_rows = self.get_values()
 
     def get_values(self):
+        """Read values from the table in visual (on-screen) order."""
         data = []
-        # Use a list comprehension to create a list of types from the rows variable
-        type_list = [x.type for x in self.rows]
-        for index in range(self.tableWidget.rowCount()):
-            values = []
+        if not self.rows:
+            return data
 
-            for row in range(len(self.rows)):
-                item = self.tableWidget.cellWidget(index, row)
-                # Get value from item
-                if type(item) != None:
-                    # Use the main.get_value() function to get the value from the item
-                    value = main.get_value(item, static=True)
-                    values.append(value)
-                else:
-                    print("Problem getting value from:", index, row)
+        title_list = [x.title for x in self.rows]
+        vh = self.tableWidget.verticalHeader()
+        rc = self.tableWidget.rowCount()
 
-            # Use a list comprehension to create a list of titles from the rows variable
-            title_list = [x.title for x in self.rows]
-
-            # Use the zip() function to combine the list of titles with the list of values
-            dictionary = dict(zip(title_list, values))
-
-            data.append(dictionary)
-
+        for v in range(rc):
+            lr = vh.logicalIndex(v)  # map visual -> logical
+            row_vals = []
+            for c in range(len(self.rows)):
+                widget = self.tableWidget.cellWidget(lr, c)
+                row_vals.append(main.get_value(widget, static=True) if widget is not None else None)
+            data.append(dict(zip(title_list, row_vals)))
         return data
 
-    def update_buttons(self):
-        '''Show remove button if selected item'''
-        # Show delete button if rows are selected
-        selected = self.tableWidget.currentRow()
-        if selected is not -1:
-            self.remove_button.setHidden(False)
-            self.insert_button.setHidden(False)
-            self.dup_button.setHidden(False)
-        else:
-            self.remove_button.setHidden(True)
-            self.insert_button.setHidden(True)
-            self.dup_button.setHidden(True)
+    # ------------------ UI plumbing ------------------
 
-    def update_values(self):
-        '''Update the values when value change'''
-
-        self.value = self.get_values()
-
-        # Emit signal so other uis connected to this will get updated
-        self.emitter.value.emit(1)
-
-        self.update_layout()
-
-        #print("Updating Dict Values")
-        #print(self.value)
+    def _update_row_buttons(self):
+        has_sel = self.tableWidget.currentRow() != -1
+        self.remove_button.setHidden(not has_sel)
+        self.insert_button.setHidden(not has_sel)
+        self.dup_button.setHidden(not has_sel)
 
     def update_layout(self):
+        """Keep this cheap; no column autosize here."""
         vertHeader = self.tableWidget.verticalHeader()
-        horHeader = self.tableWidget.horizontalHeader()
-
-        # Update height
-        margin = self.tableWidget.getContentsMargins()
-        height_sum = (vertHeader.length() + margin[0]) + horHeader.height() + margin[0]
+        horHeader  = self.tableWidget.horizontalHeader()
+        m = self.tableWidget.getContentsMargins()
+        height_sum = (vertHeader.length() + m[0]) + horHeader.height() + m[0]
         self.tableWidget.setMaximumHeight(height_sum)
         self.tableWidget.setMinimumHeight(height_sum)
 
-        #self.tableWidget.setVisible(False)
-        self.tableWidget.resizeColumnsToContents()
+    # ------------------ build table from working copy ------------------
 
-        #self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        #self.tableWidget.setVisible(True)
-        #self.tableWidget.resizeRowsToContents()
-
-
-        #horHeader = self.tableWidget.horizontalHeader()
-        horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        #horHeader.setCascadingSectionResizes(True)
+    def _purge_table_widgets(self):
+        # Remove and delete any existing cell widgets
+        rows = self.tableWidget.rowCount()
+        cols = self.tableWidget.columnCount()
+        for r in range(rows):
+            for c in range(cols):
+                w = self.tableWidget.cellWidget(r, c)
+                if w is not None:
+                    self.tableWidget.removeCellWidget(r, c)
+                    w.deleteLater()
+        # Clear items/headers after widgets are gone
+        self.tableWidget.clear()
+        self.tableWidget.setRowCount(0)
 
     def add_layout_items(self):
-        # Only run if rows are defined
         if self.rows is None:
             return
 
-        # Create lists of data from the rows
-        title_list = [x.title for x in self.rows]
-        options_list = [x.options for x in self.rows]
-        defaultValue_list = [x.defaultValue for x in self.rows]
-        multiple_list = [x.multiple for x in self.rows]
-        type_list = [x.type for x in self.rows]
+        title_list    = [x.title        for x in self.rows]
+        options_list  = [x.options      for x in self.rows]
+        default_list  = [x.defaultValue for x in self.rows]
+        multiple_list = [x.multiple     for x in self.rows]
+        type_list     = [x.type         for x in self.rows]
 
-        # Create a list of values for each item
-        item_value_list = [[item[title] for title in title_list] for item in self.value]
+        # Ensure working rows exist (mirror committed if empty)
+        if self._working_rows is None:
+            self._working_rows = copy.deepcopy(self.value or [])
 
-        # Set the number of columns in the table
-        self.tableWidget.setColumnCount(len(title_list))
+        item_value_list = [[item.get(t) for t in title_list] for item in (self._working_rows or [])]
 
-        # Set the table headers
-        self.tableWidget.setHorizontalHeaderLabels(title_list)
+        vh = self.tableWidget.verticalHeader()
 
-        # Disable updates to make the process faster
+
+        self._building = True
         self.tableWidget.setUpdatesEnabled(False)
         self.tableWidget.blockSignals(True)
+        vh.blockSignals(True)
 
-        # Set the number of rows in the table
+        self._purge_table_widgets()
+
+        self.tableWidget.setColumnCount(len(title_list))
+        self.tableWidget.setHorizontalHeaderLabels(title_list)
+        self.tableWidget.setRowCount(len(item_value_list))
+
+
+        self.tableWidget.setColumnCount(len(title_list))
+        self.tableWidget.setHorizontalHeaderLabels(title_list)
         self.tableWidget.setRowCount(len(item_value_list))
 
         widget_classes = {
@@ -946,75 +952,77 @@ class dict_holder(QtWidgets.QWidget):
             "objectMultiple": valueButton,
         }
 
-        # Iterate over the rows to create the widgets
-        for index, value in enumerate(item_value_list):
-            for row, type in enumerate(type_list):
-                widget_class = widget_classes.get(type)
-                if widget_class:
-                    widget = widget_class()
-                    if type == "str":
-                        widget.setStyleSheet("selection-background-color: rgb(0,250,250,150)")
-                        if defaultValue_list[row] is not None:
-                            widget.setText(defaultValue_list[row])
-                    elif type == "float":
-                        widget.setMaximum(99999)
-                        widget.setMinimum(-99999)
-                        widget.setSingleStep(0.01)
-                        widget.setDecimals(3)
-                        if defaultValue_list[row] is not None:
-                            widget.setValue(defaultValue_list[row])
-                    elif type == "int":
-                        widget.setMaximum(99999)
-                        widget.setMinimum(-99999)
-                        if defaultValue_list[row] is not None:
-                            widget.setValue(defaultValue_list[row])
-                    elif type == "selectSingle":
-                        widget.addItems([str(option) for option in options_list[row]])
-                        if defaultValue_list[row] is not None:
-                            widget.setCurrentText(defaultValue_list[row])
-                    elif type == "selectMultiple":
-                        widget.emitter.value.connect(self.update_layout)
-                        widget.menu.triggered.connect(self.update_layout)
-                        widget.set_options(options_list[row])
-                        if defaultValue_list[row] is not None:
-                            widget.set_value(defaultValue_list[row])
-                    elif type == "bool":
-                        if defaultValue_list[row] is not None:
-                            widget.setChecked(defaultValue_list[row])
-                    elif type == "objectSingle":
-                        widget.multiple = False
-                        widget.set_text("Add Object")
-                    elif type == "objectAttribute":
-                        widget.emitter.value.connect(self.update_layout)
-                        widget.set_multiple(multiple_list[row])
-                    elif type == "objectMultiple":
-                        widget.set_text("Add Object(s)")
+        for r, row_vals in enumerate(item_value_list):
+            for c, typ in enumerate(type_list):
+                cls = widget_classes.get(typ)
+                if not cls:
+                    continue
+                w = cls()
 
-                    item = QtWidgets.QTableWidgetItem()
-                    self.tableWidget.setItem(index, row, item)
-                    self.tableWidget.setCellWidget(index, row, widget)
+                # Defaults / setup
+                if typ == "str":
+                    w.setStyleSheet("selection-background-color: rgba(0,250,250,150)")
+                    if default_list[c] is not None:
+                        w.setText(default_list[c])
+                elif typ == "float":
+                    w.setMaximum(99999); w.setMinimum(-99999)
+                    w.setSingleStep(0.01); w.setDecimals(3)
+                    if default_list[c] is not None:
+                        w.setValue(default_list[c])
+                elif typ == "int":
+                    w.setMaximum(99999); w.setMinimum(-99999)
+                    if default_list[c] is not None:
+                        w.setValue(default_list[c])
+                elif typ == "selectSingle":
+                    w.addItems([str(o) for o in options_list[c]])
+                    if default_list[c] is not None:
+                        w.setCurrentText(default_list[c])
+                elif typ == "selectMultiple":
+                    w.set_options(options_list[c])
+                elif typ == "bool":
+                    if default_list[c] is not None:
+                        w.setChecked(default_list[c])
+                elif typ == "objectSingle":
+                    w.multiple = False
+                    w.set_text("Add Object")
+                elif typ == "objectAttribute":
+                    w.set_multiple(multiple_list[c])
+                elif typ == "objectMultiple":
+                    w.set_text("Add Object(s)")
 
-                    if value[row] is not None:
-                        main.set_value(widget, value[row])
+                # Place cell
+                self.tableWidget.setItem(r, c, QtWidgets.QTableWidgetItem())
+                self.tableWidget.setCellWidget(r, c, w)
 
-                    if type == "objectAttribute":
-                        widget.emitter.value.connect(self.update_values)
+                # Apply current working value (if present)
+                if c < len(row_vals) and row_vals[c] is not None:
+                    main.set_value(w, row_vals[c])
 
-                    main.connect_value_change(widget, connection=(self.update_values))
+                # Wire signals: edits mark dirty (no autosave),
+                # some widgets also ping layout sizing
+                if typ == "selectMultiple":
+                    w.emitter.value.connect(self._mark_dirty)
+                    w.menu.triggered.connect(self.update_layout)
+                elif typ == "objectAttribute":
+                    w.emitter.value.connect(self._mark_dirty)
+                    w.emitter.value.connect(self.update_layout)
 
-        # Update table layout
+                # Generic value change → dirty
+                main.connect_value_change(w, connection=self._mark_dirty)
+
+        # Do heavy sizing ONCE here (not per keystroke)
         self.tableWidget.resizeColumnsToContents()
-        vertHeader = self.tableWidget.verticalHeader()
-        horHeader = self.tableWidget.horizontalHeader()
-        margin = self.tableWidget.getContentsMargins()
-        height_sum = (vertHeader.length() + margin[0]) + horHeader.height() + margin[0]
-        self.tableWidget.setMaximumHeight(height_sum)
-        self.tableWidget.setMinimumHeight(height_sum)
-        horHeader.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.update_layout()
 
-        # Enable updates
-        self.tableWidget.setUpdatesEnabled(True)
+        # Re-enable
+        vh.setSectionsMovable(True)
+        vh.blockSignals(False)
         self.tableWidget.blockSignals(False)
+        self.tableWidget.setUpdatesEnabled(True)
+        self._building = False
+
+
 
 
 class communicate(Qt.QtCore.QObject):
