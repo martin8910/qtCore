@@ -10,7 +10,7 @@ from . import icon as qt_icon
 
 import os
 try:
-    import pymel.core as pm
+    import maya.cmds as cmds
 except:
     pass
 
@@ -186,7 +186,7 @@ class valueButton(QtWidgets.QToolButton):
     def add_menu_items(self):
         items = []
         items.append(["Select Objects", self.select_value])
-        if len(pm.ls(sl=True)) >= 1:
+        if len(cmds.ls(sl=True)) >= 1:
             items.append(["Add selected", self.add_more_from_menu])
             #if self.check_if_selection_exists():
             #    items.append(["Remove Selected", self.remove_selected_from_menu])
@@ -209,17 +209,13 @@ class valueButton(QtWidgets.QToolButton):
 
     def add_more_from_menu(self):
         current_values = self.get_value(static=False)
-        selection = pm.ls(sl=True)
+        selection = cmds.ls(sl=True)
         if len(selection) >= 1:
             for object in selection:
-                valueName = object.name()
-                if valueName not in current_values:
-                    if type(current_values[0]) == str or type(current_values[0]) == str:
-                        self.value.append(object.name())
-                    else:
-                        self.value.append(object)
+                if object not in current_values:
+                    self.value.append(object)
                 else:
-                    print("WARNING: '{}' already exist as a value".format(valueName))
+                    print("WARNING: '{}' already exist as a value".format(object))
             self.set_header()
             self.emitter.value.emit(1)
         else:
@@ -236,17 +232,13 @@ class valueButton(QtWidgets.QToolButton):
 
         # Get current selection
         current_values = self.get_value(static=False)
-        selection = pm.ls(sl=True)
+        selection = cmds.ls(sl=True)
         if len(selection) >= 1:
             for object in selection:
-                valueName = object.name()
-                if valueName in current_values:
-                    if type(current_values[0]) == str or type(current_values[0]) == str:
-                        self.value.remove(object.name())
-                    else:
-                        self.value.remove(object)
+                if object in current_values:
+                    self.value.remove(object)
                 else:
-                    print("WARNING: '{}' dont exist as a value".format(valueName))
+                    print("WARNING: '{}' dont exist as a value".format(object))
             self.set_header()
             self.emitter.value.emit(1)
 
@@ -255,11 +247,10 @@ class valueButton(QtWidgets.QToolButton):
         return_value = False
         current_values = self.get_value(static=False)
         if current_values:
-            selection = pm.ls(sl=True)
+            selection = cmds.ls(sl=True)
             if len(selection) >= 1:
                 for object in selection:
-                    valueName = object.name()
-                    if valueName in current_values:
+                    if object in current_values:
                         return_value = True
         return return_value
 
@@ -280,11 +271,10 @@ class valueButton(QtWidgets.QToolButton):
 
     def add_value(self):
         # Get current selection from the scene and add as values to this object
-        selection = pm.ls(sl=True)
+        selection = cmds.ls(sl=True)
         if len(selection) >= 1:
             if self.multiple:
-                valueName = [object.name() for object in selection]
-                valueName = " , ".join(valueName)
+                valueName = " , ".join(selection)
 
                 if type(selection) == list or type(selection) == tuple:
                     self.set_value(selection, valueName=valueName)
@@ -292,7 +282,7 @@ class valueButton(QtWidgets.QToolButton):
                     pass
                     #self.set_value([selection], valueName=valueName)
             else:
-                self.set_value(selection[0], valueName=selection[0].name())
+                self.set_value(selection[0], valueName=selection[0])
 
 
             self.opacity = 1
@@ -379,7 +369,7 @@ class valueButton(QtWidgets.QToolButton):
                 # Check missing geo
                 if self.value is not None:
                     if len(self.value) != 0:
-                        existing_geo = [x for x in self.static_value if pm.objExists(x)]
+                        existing_geo = [x for x in self.static_value if cmds.objExists(x)]
                         self.missing_value = list(set(self.static_value) - set(existing_geo))
                         if self.missing_value:
                             print("The following item dont exist in the scene:")
@@ -419,7 +409,7 @@ class valueButton(QtWidgets.QToolButton):
             return self.value
 
     def select_value(self):
-        pm.select(self.value)
+        cmds.select(self.value)
 
     # def mousePressEvent(self, event):
     #     '''re-implemented to suppress Right-Clicks from selecting items.'''

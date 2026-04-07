@@ -5,8 +5,6 @@ import os, sys
 from maya import OpenMayaUI
 import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin, MayaQDockWidget
-import pymel.core as pm
-
 from .external.Qt import QtWidgets, QtCore, QtCompat, QtGui, Qt
 from . import main, icon
 from .animation import animateWidgetSize, resizeWindowAnimation
@@ -297,7 +295,7 @@ class generic_window(QtWidgets.QWidget):
         pass
 
 class attribute_holder(QtWidgets.QWidget):
-    '''Holds a pymel object and extract its attributes in a list. Multiple let you choose multiple attributes.'''
+    '''Holds a Maya object and extracts its attributes in a list. Multiple let you choose multiple attributes.'''
     def __init__(self, parent=None):
         super(attribute_holder, self).__init__(parent)
 
@@ -376,23 +374,23 @@ class attribute_holder(QtWidgets.QWidget):
             all_attributes = []
             attribute_lists = []
 
-            existing_geo = [x for x in button_value if pm.objExists(x)]
+            existing_geo = [x for x in button_value if cmds.objExists(x)]
             missing_geo = list(set(button_value) - set(existing_geo))
             for x in existing_geo:
-                node_type = pm.nodeType(x)
-                classifications = pm.getClassification(node_type)[-1]
+                node_type = cmds.nodeType(x)
+                classifications = cmds.getClassification(node_type)[-1]
                 if node_type == "blendShape":
-                    attribute_lists.append(pm.listAttr(str(x) + ".w", m=True))
+                    attribute_lists.append(cmds.listAttr(str(x) + ".w", m=True))
                 elif "utility" in classifications:
-                    input_attr = pm.listAttr(x, keyable=True, visible=True, locked=False)
-                    output_attr = pm.listAttr(x, output=True, readOnly=True)
+                    input_attr = cmds.listAttr(x, keyable=True, visible=True, locked=False)
+                    output_attr = cmds.listAttr(x, output=True, readOnly=True)
                     attribute_lists.append(input_attr + output_attr)
                 elif "deformer" in classifications:
-                    input_attr = pm.listAttr(x, keyable=True, visible=True, locked=False)
-                    output_attr = pm.listAttr(x, output=True, readOnly=True)
+                    input_attr = cmds.listAttr(x, keyable=True, visible=True, locked=False)
+                    output_attr = cmds.listAttr(x, output=True, readOnly=True)
                     attribute_lists.append(input_attr + output_attr)
                 else:
-                    attribute_lists.append(pm.listAttr(x, keyable=True, visible=True, locked=False, shortNames=False))
+                    attribute_lists.append(cmds.listAttr(x, keyable=True, visible=True, locked=False, shortNames=False))
 
             #Sort and filter out only attributes existing in all controllers
             unice_attributes = set([x for y in attribute_lists for x in y])
@@ -619,11 +617,10 @@ class pymel_holder(QtWidgets.QWidget):
     def add_more(self):
         '''Add the current selection to the list'''
 
-        selection = pm.ls(sl=True)
+        selection = cmds.ls(sl=True)
         if len(selection) >= 1:
             for object in selection:
-                valueName = object.name()
-                self.value.append(valueName)
+                self.value.append(object)
         else:
             print("No selection to add from")
 
