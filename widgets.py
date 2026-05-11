@@ -112,7 +112,7 @@ class header_card_ui(QtWidgets.QWidget):
 
         # Create discription label
         self.descriptionLabel = QtWidgets.QLabel(self.mainFrame)
-        self.descriptionLabel.setStyleSheet("color: rgb(250,250,250,50)")
+        self.descriptionLabel.setStyleSheet("color: rgba(250,250,250,50)")
         self.descriptionLabel.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         # Description bold
         font = QtGui.QFont()
@@ -248,10 +248,10 @@ class card_simple_ui(QtWidgets.QWidget):
 
         self.infoButton = QtWidgets.QToolButton()
         self.infoButton.setText("?")
-        self.infoButton.setStyleSheet("background-color: rgb(250,250,0,100);color: rgb(0,0,0), border-radius: 3px;")
+        self.infoButton.setStyleSheet("background-color: rgba(250,250,0,100);color: rgb(0,0,0), border-radius: 3px;")
 
         #self.infoLabel = QtWidgets.QLabel(self.mainFrame)
-        #self.infoLabel.setStyleSheet('color: rgb(250,250,250,60)')
+        #self.infoLabel.setStyleSheet('color: rgba(250,250,250,60)')
 
         # self.descriptionLabel.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.nameLabel.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
@@ -333,7 +333,7 @@ class collapsable_tab():
         self.header.setText(name)
         self.header.setOpacity(0.5)
         self.header.setIconSize(QtCore.QSize(10, 10))
-        self.header.setStyleSheet("padding-left: 5px;text-align: left;background-color: rgb(0,0,0,0);border-style: none;")
+        self.header.setStyleSheet("padding-left: 5px;text-align: left;background-color: rgba(0,0,0,0);border-style: none;")
         self.header.setMaximumHeight(25)
         self.header.setMinimumHeight(25)
         # Add icon to header
@@ -345,7 +345,7 @@ class collapsable_tab():
         self.holder.setMaximumWidth(10000)
         self.holder.setMaximumHeight(1)
         self.holder.setObjectName("frameHolder")
-        self.holder.setStyleSheet("QFrame#frameHolder{background-color: rgb(0,0,0,0)}")
+        self.holder.setStyleSheet("QFrame#frameHolder{background-color: rgba(0,0,0,0)}")
         layout.addWidget(self.holder)
 
         self.holder.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)

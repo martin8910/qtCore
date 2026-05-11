@@ -109,7 +109,7 @@ class popButton(QtWidgets.QPushButton):
         # self.setSize(self.width, self.height)
         #self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
 
-        self.setStyleSheet('''QPushButton {color: rgb(250, 250, 250);background-color: rgb(0, 250, 0,0);border-style: None;border-width: 0px;}QPushButton:menu-indicator { image: none; }''')
+        self.setStyleSheet('''QPushButton {color: rgb(250, 250, 250);background-color: rgba(0, 250, 0,0);border-style: None;border-width: 0px;}QPushButton:menu-indicator { image: none; }''')
 
 
     def setSize(self, width, height):
@@ -169,9 +169,9 @@ class valueButton(QtWidgets.QToolButton):
         self.textCutoff = 20
 
         # Set style
-        self.inactiveStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(250,250,250,20);\ncolor: rgb(250,250,250,200);\n}QToolButton::menu-indicator{width:0px;}"
-        self.errorStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(234,100,61,20);\ncolor: rgb(250,250,250,200);\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(250,250,250,20);\nborder-style: solid;\n}QToolButton::menu-indicator{width:0px;}"
-        self.activeStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgb(250,250,250,200);\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\n}QToolButton:disabled{background-color: rgb(0, 153, 51, 30);}QToolButton::menu-indicator{width:0px;}"
+        self.inactiveStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgba(250,250,250,20);\ncolor: rgba(250,250,250,200);\n}QToolButton::menu-indicator{width:0px;}"
+        self.errorStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgba(234,100,61,20);\ncolor: rgba(250,250,250,200);\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgba(250,250,250,20);\nborder-style: solid;\n}QToolButton::menu-indicator{width:0px;}"
+        self.activeStyleSheet = "QToolButton\n{\npadding: 1px;\nborder-radius: 10px;\nbackground-color: rgb(0, 153, 51);\ncolor: rgba(250,250,250,200);\n\n}\n\nQToolButton:focus\n{\nbackground-color: rgb(0, 153, 51);\n}QToolButton:disabled{background-color: rgba(0, 153, 51, 30);}QToolButton::menu-indicator{width:0px;}"
 
         # Stylesheet
         self.setStyleSheet(self.inactiveStyleSheet)
@@ -263,7 +263,7 @@ class valueButton(QtWidgets.QToolButton):
         self.emitter.value.emit(1)
 
     def update_valueItems(self):
-        if len(self.value_connector) is not 0:
+        if len(self.value_connector) != 0:
             for object in self.value_connector:
                 valueName = [o.name() for o in self.value]
                 valueName = "".join(valueName)
@@ -318,7 +318,7 @@ class valueButton(QtWidgets.QToolButton):
             self.setStyleSheet(self.activeStyleSheet)
 
         # Set Static values
-        if len(value) is not 0:
+        if len(value) != 0:
             if isinstance(value[0], str):
                 self.static_value = value
             else:
@@ -441,15 +441,15 @@ class dropButton(valueButton):
         if event.mimeData().hasFormat('text/plain'):
             event.accept()
             # Add highlight to window
-            self.setStyleSheet('background-color: rgb(250,250,250,250')
+            self.setStyleSheet('background-color: rgba(250,250,250,250)')
 
     def dragLeaveEvent(self, e):
         # Reset highlight to window
-        self.setStyleSheet('background-color: rgb(250,250,250,200')
+        self.setStyleSheet('background-color: rgba(250,250,250,200)')
 
     def dropEvent(self, event):
         # Reset highlight to window
-        self.setStyleSheet('background-color: rgb(250,250,250,50')
+        self.setStyleSheet('background-color: rgba(250,250,250,50)')
 
         droppedCommand = event.mimeData().text()
 
@@ -471,7 +471,7 @@ class pathButton(QtWidgets.QPushButton):
         icon = qt_icon.load_svg((relativePath + os.sep + "icons" + os.sep + "folderIcon.svg"))
         self.setIcon(icon)
         # Set color of button
-        self.setStyleSheet('background-color: rgb(250,250,250,0')
+        self.setStyleSheet('background-color: rgba(250,250,250,0)')
         self.setFlat(True)
 
         self.clicked.connect(self.add_path)

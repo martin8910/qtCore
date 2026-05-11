@@ -20,13 +20,17 @@ if sys.version_info >= (3, ):
 relativePath = os.path.dirname(os.path.realpath(__file__)) + os.sep
 parentPath = os.path.abspath(os.path.join(relativePath, os.pardir))
 
-#Shiboken
+#Shiboken - try shiboken6 (Maya 2025+/PySide6), then shiboken2 (Maya 2022-2024), then shiboken (legacy)
 try:
-    from shiboken import wrapInstance
-    import shiboken
-except:
-    from shiboken2 import wrapInstance
-    import shiboken2 as shiboken
+    from shiboken6 import wrapInstance
+    import shiboken6 as shiboken
+except ImportError:
+    try:
+        from shiboken2 import wrapInstance
+        import shiboken2 as shiboken
+    except ImportError:
+        from shiboken import wrapInstance
+        import shiboken
 
 
 
@@ -559,7 +563,7 @@ class pymel_holder(QtWidgets.QWidget):
         button_value = self.select_button.get_value(static=True)
 
         if button_value is not None:
-            if len(button_value) is not 0:
+            if len(button_value) != 0:
                 self.set_value(button_value)
 
             self.toggle_buttons()

@@ -1,6 +1,6 @@
 QPushButton, QToolButton
 {
-	background-color: rgb(0,0,0,50);
+	background-color: rgba(0,0,0,50);
 	border-radius: 10px;
 	border-style: solid;
 	border-width: 1px;
@@ -8,7 +8,7 @@ QPushButton, QToolButton
 }
 
 QComboBox {
-	background-color: rgb(0,0,0,50);
+	background-color: rgba(0,0,0,50);
 	border-radius: 10px;
 	border-style: solid;
 	border-width: 1px;
@@ -18,12 +18,12 @@ QComboBox {
  
  /* Main area when not active */
  QComboBox:!editable, QComboBox::drop-down:editable {
-	background-color: rgb(0,0,0,50);
+	background-color: rgba(0,0,0,50);
  }
 
  /* Main area when active */
  QComboBox:!editable:on, QComboBox::drop-down:editable:on {
- 	background-color: rgb(0,0,0,100);
+ 	background-color: rgba(0,0,0,100);
  }
 
 
